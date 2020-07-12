@@ -1,4 +1,6 @@
 package com.example.fyp_patient
 
-class Model(val title: String, val des: String, val image : Int) {
+import android.net.Uri
+
+class Model(val title: String, val des: String, val uri: Uri) {
 }
