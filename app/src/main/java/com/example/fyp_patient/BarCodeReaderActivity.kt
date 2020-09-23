@@ -1,19 +1,35 @@
 package com.example.fyp_patient
 
+import ContractorHandlers.MainContractorHandler
+import android.Manifest
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.util.SparseArray
 import android.view.SurfaceHolder
+import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
+import crypto.did.DID
+import io.socket.client.IO
+import io.socket.client.Socket
+import io.socket.emitter.Emitter
+import javaethereum.contracts.generated.MainContract
 import kotlinx.android.synthetic.main.activity_bar_code_reader.*
-import java.lang.Exception
+import org.json.JSONException
+import org.json.JSONObject
+import org.web3j.protocol.Web3j
+import utilities.EthFunctions
+import utilities.EthFunctions.createWallet
+import java.util.*
+import kotlin.math.floor
+
 
 class BarCodeReaderActivity : AppCompatActivity() {
 
@@ -21,6 +37,7 @@ class BarCodeReaderActivity : AppCompatActivity() {
     private val requestCodeCameraPermission = 1001
     private lateinit var cameraSource : CameraSource
     private lateinit var detector : BarcodeDetector
+    private var did : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,6 +52,8 @@ class BarCodeReaderActivity : AppCompatActivity() {
         }else {
             setupControls()
         }
+
+
     }
 
     private fun setupControls() {
@@ -64,7 +83,7 @@ class BarCodeReaderActivity : AppCompatActivity() {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 setupControls()
             }else {
-                Toast.makeText(applicationContext,"Permission Denied", Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "Permission Denied", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -72,36 +91,90 @@ class BarCodeReaderActivity : AppCompatActivity() {
     private val surfaceCallBack = object : SurfaceHolder.Callback {
         override fun surfaceChanged(p0: SurfaceHolder?, p1: Int, p2: Int, p3: Int) {
         }
-
         override fun surfaceDestroyed(p0: SurfaceHolder?) {
             cameraSource.stop()
         }
 
         override fun surfaceCreated(surfaceHolder: SurfaceHolder?) {
             try {
+                if (ActivityCompat.checkSelfPermission(
+                        applicationContext,
+                        Manifest.permission.CAMERA
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    askForCameraPermission()
+                    return
+                }
                 cameraSource.start(surfaceHolder)
             } catch (exception: Exception){
-                Toast.makeText(applicationContext,"Something went wrong", Toast.LENGTH_SHORT).show()
+                Toast.makeText(applicationContext, "Something went wrong", Toast.LENGTH_SHORT).show()
             }
         }
 
     }
 
+
     private val processor = object : Detector.Processor<Barcode>{
         override fun release() {
-            TODO("Not yet implemented")
         }
 
         override fun receiveDetections(detections: Detector.Detections<Barcode>?) {
+
             if (detections != null && detections.detectedItems != null){
                 val qrCodes: SparseArray<Barcode> = detections.detectedItems
                 val code = qrCodes.valueAt(0)
                 textScanResult.text = code.displayValue
+//                did = code.displayValue
+                did = "asdfghjhgfdsaadfghjkhgfdsdfghgf"
+                if (did != null){
+                    Log.i("did", "i am called$did")
+                    cameraSurfaceView.visibility = View.GONE
+                    cameraSource.stop()
+                    Toast.makeText(this@BarCodeReaderActivity, "scanned", Toast.LENGTH_SHORT).show()
+                    /********display a loading item ************/
+                    val web3j :Web3j = EthFunctions.connect("https://mainnet.infura.io/v3/898d9e570ec143d6ada30bfdeab9572c")
+                    val mainContractorHandler = MainContractorHandler.getInstance()
+
+                    val credentials = createWallet("123", filesDir.absolutePath) /******* make a temporary wallet *********/
+                    val mainContract: MainContract = mainContractorHandler.getWrapperForMainContractor(
+                            web3j, getString(
+                                R.string.main_contractor_address
+                            ), credentials
+                        )
+
+                    val  doctorDetails = mainContract.getDoctorDetails(did)
+                    val didDocumentLink = doctorDetails.send().value1
+                    val verifiableClaimLink = doctorDetails.send().value2
+                    val claimIssuerLink = "TO DO"
+                    /****** Download these files using the links ************/
+
+                    val isValidate : Boolean = mainContract.validateDoctor(did, "profile hash", "claim hash").send()
+                    if (isValidate){
+                        validated(did!!)
+                    }else{
+                        validationFailed()
+                    }
+
+                }
             } else {
                 textScanResult.text = ""
+                did = ""
             }
         }
+    }
+    fun validationFailed(){}
+
+
+    fun validated(did: String){
+        //Read Public Key /******TO DO **************/
+        ChallengeResponse(did).challengeResponse()
+
+
 
     }
+
+
+
+
 
 }
