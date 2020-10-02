@@ -33,6 +33,7 @@ import kotlin.math.floor
 
 class BarCodeReaderActivity : AppCompatActivity() {
 
+    private var isFirstTime = true
 
     private val requestCodeCameraPermission = 1001
     private lateinit var cameraSource : CameraSource
@@ -124,33 +125,41 @@ class BarCodeReaderActivity : AppCompatActivity() {
                 val qrCodes: SparseArray<Barcode> = detections.detectedItems
                 val code = qrCodes.valueAt(0)
                 textScanResult.text = code.displayValue
-//                did = code.displayValue
-                did = "asdfghjhgfdsaadfghjkhgfdsdfghgf"
+                did = code.displayValue
+                detector.release()
+
                 if (did != null){
-                    Log.i("did", "i am called$did")
-                    cameraSurfaceView.visibility = View.GONE
-                    cameraSource.stop()
-                    Toast.makeText(this@BarCodeReaderActivity, "scanned", Toast.LENGTH_SHORT).show()
+//                    cameraSource.stop()
+
+                    Log.i("did", "i am cdhgghdfalled$did")
+//                    cameraSurfaceView.visibility = View.INVISIBLE
+//                    Toast.makeText(this@BarCodeReaderActivity, "scanned", Toast.LENGTH_SHORT).show()
                     /********display a loading item ************/
-                    val web3j :Web3j = EthFunctions.connect("https://mainnet.infura.io/v3/898d9e570ec143d6ada30bfdeab9572c")
-                    val mainContractorHandler = MainContractorHandler.getInstance()
-
-                    val credentials = createWallet("123", filesDir.absolutePath) /******* make a temporary wallet *********/
-                    val mainContract: MainContract = mainContractorHandler.getWrapperForMainContractor(
-                            web3j, getString(
-                                R.string.main_contractor_address
-                            ), credentials
-                        )
-
-                    val  doctorDetails = mainContract.getDoctorDetails(did)
-                    val didDocumentLink = doctorDetails.send().value1
-                    val verifiableClaimLink = doctorDetails.send().value2
-                    val claimIssuerLink = "TO DO"
+//                    val web3j :Web3j = EthFunctions.connect("https://mainnet.infura.io/v3/898d9e570ec143d6ada30bfdeab9572c")
+//                    val mainContractorHandler = MainContractorHandler.getInstance()
+//
+//                    val credentials = createWallet("123", filesDir.absolutePath) /******* make a temporary wallet *********/
+//                    val mainContract: MainContract = mainContractorHandler.getWrapperForMainContractor(
+//                            web3j, getString(
+//                                R.string.main_contractor_address
+//                            ), credentials
+//                        )
+//
+//                    val  doctorDetails = mainContract.getDoctorDetails(did)
+//                    val didDocumentLink = doctorDetails.send().value1
+//                    val verifiableClaimLink = doctorDetails.send().value2
+//                    val claimIssuerLink = "TO DO"
                     /****** Download these files using the links ************/
 
-                    val isValidate : Boolean = mainContract.validateDoctor(did, "profile hash", "claim hash").send()
-                    if (isValidate){
-                        validated(did!!)
+//                    val isValidate : Boolean = mainContract.validateDoctor(did, "profile hash", "claim hash").send()
+                    val isValidate = true
+                    if (true){
+                        Log.i("cid", "validate function called")
+
+                        ChallengeResponse(did!!).challengeResponse()
+                        Log.i("cid", "validabnmte function called")
+
+
                     }else{
                         validationFailed()
                     }
@@ -167,7 +176,8 @@ class BarCodeReaderActivity : AppCompatActivity() {
 
     fun validated(did: String){
         //Read Public Key /******TO DO **************/
-        ChallengeResponse(did).challengeResponse()
+        Log.i("did", "validate function called")
+
 
 
 

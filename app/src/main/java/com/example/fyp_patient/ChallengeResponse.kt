@@ -22,14 +22,13 @@ class ChallengeResponse(private val did: String) {
 
 
         val challenge = getRandomString()?.let { MessageObject(MessageType.CHALLENGE, it) }!!
+        Log.i("msg", challenge.getMessage())
         val challengeString = MessageSerializerHandler.instance?.serialize(challenge)
         val jsonObject = challengeString?.let { createMessage(did, it) }
-        val socket = IO.socket("http://10.10.7.52:8083",opts)
+        val socket = IO.socket("https://2141575b3928.ngrok.io",opts)
 
         socket.on(Socket.EVENT_CONNECT, Emitter.Listener {
-            fun call(vararg objects: Any?) {
                 socket.emit("sendTo",jsonObject)
-            }
 
         }).on("fromServer", Emitter.Listener {
             fun call(vararg  objects:Any?) {
@@ -39,14 +38,17 @@ class ChallengeResponse(private val did: String) {
                 val messageObject : MessageObject = MessageSerializerHandler.instance?.deserialize(msg as String) as MessageObject
                 when(messageObject.getType()){
                     MessageType.CHALLENGE -> Log.i("message","Invalid...........")
-                    MessageType.RESPONSE -> responseHandler(messageObject.getMessage(),challenge.getMessage())
-                    MessageType.SECRET_KEY -> secretKeyHandler()
-                    MessageType.TERMINATE -> mTerminate(socket)
+                    MessageType.RESPONSE -> responseHandler(socket,messageObject.getMessage(),challenge.getMessage())
+                    MessageType.SECRET_KEY -> Log.i("message","Invalid...........")
+                    MessageType.TERMINATE -> Log.i("message","Invalid...........")
                     MessageType.PING -> ping(socket)
                 }
             }
         })
+        socket.on(Socket.EVENT_DISCONNECT) { Log.i("msg", "asdfghjhgfds") }
+        socket.connect()
     }
+
 
     private fun getRandomString(): String? {
         val length = floor(Math.random()*10+20).toInt()
@@ -60,9 +62,16 @@ class ChallengeResponse(private val did: String) {
         return salt.toString()
     }
 
-    private fun responseHandler(message: String, challenge: String) {
+    private fun responseHandler(socket: Socket,message: String, challenge: String) {
         if (message.equals(challenge)){
             isValidated = true
+            socket.emit("sendTo", createMessage(did,
+                MessageSerializerHandler.instance?.serialize(MessageObject(MessageType.VALIDATION,"True"))!!
+            ))
+        }else{
+            socket.emit("sendTo", createMessage(did,
+                MessageSerializerHandler.instance?.serialize(MessageObject(MessageType.VALIDATION,"False"))!!
+            ))
         }
     }
 
