@@ -1,7 +1,9 @@
 package com.example.fyp_patient
 
+import ContractorHandlers.IAMContractorHandler
 import ContractorHandlers.MainContractorHandler
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
@@ -16,6 +18,8 @@ import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
+import com.google.gson.Gson
+import crypto.VC.VCCover
 import crypto.did.DID
 import io.socket.client.IO
 import io.socket.client.Socket
@@ -136,7 +140,7 @@ class BarCodeReaderActivity : AppCompatActivity() {
 //                    Toast.makeText(this@BarCodeReaderActivity, "scanned", Toast.LENGTH_SHORT).show()
                     /********display a loading item ************/
 //                    val web3j :Web3j = EthFunctions.connect("https://mainnet.infura.io/v3/898d9e570ec143d6ada30bfdeab9572c")
-//                    val mainContractorHandler = MainContractorHandler.getInstance()
+                    val iamContractorHandler = IAMContractorHandler.getInstance()
 //
 //                    val credentials = createWallet("123", filesDir.absolutePath) /******* make a temporary wallet *********/
 //                    val mainContract: MainContract = mainContractorHandler.getWrapperForMainContractor(
@@ -150,15 +154,16 @@ class BarCodeReaderActivity : AppCompatActivity() {
 //                    val verifiableClaimLink = doctorDetails.send().value2
 //                    val claimIssuerLink = "TO DO"
                     /****** Download these files using the links ************/
+                    val vc = "";
+                    val didDoc = "";
 
 //                    val isValidate : Boolean = mainContract.validateDoctor(did, "profile hash", "claim hash").send()
+
                     val isValidate = true
-                    if (true){
-                        Log.i("cid", "validate function called")
-
-                        ChallengeResponse(did!!,"myid").challengeResponse()
-                        Log.i("cid", "validabnmte function called")
-
+                    if (isValidate){
+                        val intent: Intent = Intent(applicationContext, DisplayDoctorDetailsActivity::class.java)
+                        intent.putExtra("vcString", vc)
+                        startActivity(intent)
 
                     }else{
                         validationFailed()
