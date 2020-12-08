@@ -1,9 +1,12 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.signIn
 
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.example.fyp_patient.ChallengeResponse
+import com.example.fyp_patient.R
+import com.example.fyp_patient.camera.CameraImageRecycleViewActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient

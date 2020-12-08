@@ -1,4 +1,4 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.drive
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
@@ -7,6 +7,7 @@ import com.google.api.client.http.FileContent
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
 import com.google.api.services.drive.model.FileList
+import com.google.api.services.drive.model.Permission
 import java.io.IOException
 import java.util.concurrent.Callable
 import java.util.concurrent.Executor
@@ -53,7 +54,7 @@ class DriveServiceHelper(private val mDriveService: Drive) {
             Callable<GoogleDriveFileHolder> {
                 val googleDriveFileHolder = GoogleDriveFileHolder()
                 val root: List<String>
-                root = folderId?.let { listOf(it) } ?: listOf("root")
+                root = folderId?.let { listOf(it) } ?: listOf("medico")
                 val metadata =
                     File()
                         .setParents(root)
@@ -120,7 +121,8 @@ class DriveServiceHelper(private val mDriveService: Drive) {
     // TO UPLOAD A FILE ONTO DRIVE
     fun uploadFile(
         localFile: java.io.File,
-        mimeType: String?, folderId: String?
+        mimeType: String?, folderId: String?,
+        permission: Permission = Permission().setType("anyone").setRole("reader")
     ): Task<Any>? {
         return Tasks.call(mExecutor, Callable<Any> { // Retrieve the metadata as a File object.
             val root: List<String>

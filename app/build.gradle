@@ -73,7 +73,14 @@ dependencies {
     implementation group: 'org.web3j', name: 'core', version: '4.1.0-android'
 
     implementation group: 'io.socket', name: 'socket.io-client', version: '1.0.0'
+
     compileOnly 'com.google.android.wearable:wearable:2.5.0'
+
+
+    implementation 'com.google.android.gms:play-services-vision:20.1.2'
+
+    implementation 'id.zelory:compressor:2.1.0'
+
 
 
 }

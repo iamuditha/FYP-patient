@@ -1,18 +1,19 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.camera
 
 
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.Bitmap
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.util.SparseArray
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -21,23 +22,30 @@ import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.fyp_patient.*
+import com.example.fyp_patient.drive.DriveServiceHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.Scope
-import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.gms.vision.Frame
+import com.google.android.gms.vision.text.TextBlock
+import com.google.android.gms.vision.text.TextRecognizer
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
-import com.google.gson.Gson
+import id.zelory.compressor.Compressor
 import kotlinx.android.synthetic.main.activity_imagerecycleview.*
 import kotlinx.android.synthetic.main.image_list_item.*
 import kotlinx.android.synthetic.main.toolbar_layout.*
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickListener{
@@ -56,7 +64,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
 
     lateinit var googleDriveService: Drive
     var mDriveServiceHelper: DriveServiceHelper? = null
-    var adapter = CameraImagesAdapter(arrayList,this)
+    var adapter = CameraImagesAdapter(arrayList, this)
 
     var selection_list = ArrayList<CameraImagesModel>()
     var counter = 0
@@ -76,6 +84,8 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
 
         // Build a GoogleSignInClient with the options specified by gso.
         GoogleSignIn.getClient(this, gso)
+        checkForGooglePermissions()
+
 
         btn.setOnClickListener {
             checkForGooglePermissions()
@@ -86,7 +96,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
         }
 
         bar.setOnClickListener {
-            val intent = Intent(this,BarCodeReaderActivity::class.java)
+            val intent = Intent(this, BarCodeReaderActivity::class.java)
             startActivity(intent)
         }
 
@@ -155,9 +165,17 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
         super.onActivityResult(requestCode, resultCode, data)
         //called when image is captured from camera intent
         if (resultCode == Activity.RESULT_OK) {
+            val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, image_uri)
+            readText(bitmap)
             //set the image to the image view
             image_uri?.let { uriArrayList.add(it) }
-            arrayList.add((image_uri?.let { CameraImagesModel("My title", "My description", it) }!!))
+            arrayList.add((image_uri?.let {
+                CameraImagesModel(
+                    "My title",
+                    "My description",
+                    it
+                )
+            }!!))
             Log.i("check123", image_uri.toString())
             updateView()
         }
@@ -175,14 +193,18 @@ private fun uploadPdfFile() {
         progressDialog.setMessage("Please wait........")
         progressDialog.show()
 //        val filePath = "/storage/emulated/0/Test.jpg"
-        Log.i("mypath",getPath(arrayList[0].uri) )
+        Log.i("mypath", getPath(arrayList[0].uri))
         driveServiceHelper!!.createFilePdf(getPath(arrayList[0].uri).toString())?.addOnSuccessListener {
         progressDialog.dismiss()
         Toast.makeText(applicationContext, "Uploaded Successfully", Toast.LENGTH_SHORT).show()
     }
         ?.addOnFailureListener {
             progressDialog.dismiss()
-            Toast.makeText(applicationContext, "Check your google Drive api key", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                applicationContext,
+                "Check your google Drive api key",
+                Toast.LENGTH_SHORT
+            ).show()
         }
     }
 //
@@ -195,18 +217,20 @@ private fun uploadPdfFile() {
                 Log.i(TAG, "Bitmap is null")
                 return
             }
-            val file =
-                File(applicationContext.filesDir, "donebro")
+            val file = File(applicationContext.filesDir, UUID.randomUUID().toString().substring(0,5))
             val bos = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos)
-            val bitmapdata = bos.toByteArray()
+            val bitmapData = bos.toByteArray()
 
             //write the bytes in file
             val fos = FileOutputStream(file)
-            fos.write(bitmapdata)
+            fos.write(bitmapData)
             fos.flush()
             fos.close()
-            mDriveServiceHelper?.uploadFile(file, "image/jpeg", null)
+            val compressedImageFile = Compressor(this).compressToFile(file);
+            val inputStream = FileInputStream(compressedImageFile)
+            val encryptedFile = EncryptAndDecrypt().encryptFile(inputStream)
+            mDriveServiceHelper?.uploadFile(encryptedFile, "application/octet-stream", null)
                 ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
                     Log.i(
                         TAG,
@@ -291,7 +315,7 @@ private fun uploadPdfFile() {
 
     override fun onLongClick(view: View?): Boolean {
         if (toolbar==null){
-            Log.i("check","toolbar is null")
+            Log.i("check", "toolbar is null")
         }
         toolbar.menu.clear()
         toolbar.inflateMenu(R.menu.menu_action_mode)
@@ -303,22 +327,22 @@ private fun uploadPdfFile() {
         return true
     }
 
-     fun prepareSelection(view: View?, position:Int?){
+     fun prepareSelection(view: View?, position: Int?){
         if ((view as CheckBox).isChecked){
             selection_list.add(arrayList[position!!])
-            Toast.makeText(applicationContext,position.toString(),Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext, position.toString(), Toast.LENGTH_SHORT).show()
             counter += 1
             updateCounter(counter)
         }else{
             selection_list.remove(arrayList[position!!])
-            Toast.makeText(applicationContext,position.toString(),Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext, position.toString(), Toast.LENGTH_SHORT).show()
             counter -= 1
             updateCounter(counter)
         }
 
     }
 
-    private fun updateCounter(counter:Int){
+    private fun updateCounter(counter: Int){
         if (counter==0){
             counter_text.text = "0 items are selected"
         }else{
@@ -342,7 +366,7 @@ private fun uploadPdfFile() {
         toolbar.menu.clear()
         toolbar.inflateMenu(R.menu.main)
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        for (cameraImagesModel:CameraImagesModel in selection_list){
+        for (cameraImagesModel: CameraImagesModel in selection_list){
             getPath(cameraImagesModel.uri)?.let { deleteImage(it) }
         }
         counter_text.visibility=View.GONE
@@ -361,13 +385,48 @@ private fun uploadPdfFile() {
         }
     }
 
-    private fun deleteImage(path : String){
+    private fun deleteImage(path: String){
         val delete = File(path)
         if (delete.exists()) {
             if (delete.delete()) {
                 println("file Deleted :$path")
             } else {
                 println("file not Deleted :$path")
+            }
+        }
+    }
+
+    private fun readText(imageBitmap: Bitmap){
+
+        val LOG_TAG = "detectedText"
+        // imageBitmap is the Bitmap image you're trying to process for text
+
+        // imageBitmap is the Bitmap image you're trying to process for text
+        if (imageBitmap != null) {
+            val textRecognizer: TextRecognizer = TextRecognizer.Builder(this).build()
+            if (!textRecognizer.isOperational()) {
+                Log.w(LOG_TAG, "Detector dependencies are not yet available.")
+
+                // Check for low storage.  If there is low storage, the native library will not be
+                // downloaded, so detection will not become operational.
+                val lowstorageFilter = IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW)
+                val hasLowStorage = registerReceiver(null, lowstorageFilter) != null
+                if (hasLowStorage) {
+                    Toast.makeText(this, "Low Storage", Toast.LENGTH_LONG).show()
+                    Log.w(LOG_TAG, "Low Storage")
+                }
+            }
+            val imageFrame = Frame.Builder()
+                .setBitmap(imageBitmap)
+                .build()
+
+            val textBlocks: SparseArray<TextBlock> = textRecognizer.detect(imageFrame)
+            for (i in 0 until textBlocks.size()) {
+                val item: TextBlock = textBlocks.valueAt(i)
+                if (item.value != null) {
+                    Log.d(LOG_TAG, "Text detected! " + item.value)
+
+                }
             }
         }
     }

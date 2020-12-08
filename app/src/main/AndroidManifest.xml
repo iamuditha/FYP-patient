@@ -23,6 +23,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <uses-library
             android:name="com.google.android.wearable"
             android:required="true" />
@@ -44,27 +45,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".BarCodeReaderActivity">
+
+
+        <activity android:name=".BarCodeReaderActivity"></activity>
+        <activity android:name=".camera.FullScreenImageActivity" />
+<!--        <activity-->
+<!--            android:name=".camra.FullscreenActivity"-->
+<!--            android:configChanges="orientation|keyboardHidden|screenSize"-->
+<!--            android:label="@string/title_activity_fullscreen"-->
+<!--            android:theme="@style/FullscreenTheme" />-->
+        <activity android:name=".signIn.SignInActivity">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".FullScreenImageActivity" />
-        <activity
-            android:name=".FullscreenActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/title_activity_fullscreen"
-            android:theme="@style/FullscreenTheme" />
-        <activity android:name=".SignInActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity android:name=".CameraImageRecycleViewActivity" />
+        <activity android:name=".camera.CameraImageRecycleViewActivity" />
 
 
     </application>
