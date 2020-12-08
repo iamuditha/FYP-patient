@@ -1,4 +1,4 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.camera
 
 import android.content.Context
 import android.content.Intent
@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.example.fyp_patient.R
 import kotlinx.android.synthetic.main.image_list_item.view.*
 
 class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, private val context: Context) :

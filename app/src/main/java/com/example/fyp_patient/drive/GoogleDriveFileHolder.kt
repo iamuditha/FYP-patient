@@ -1,4 +1,4 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.drive
 
 import com.google.api.client.util.DateTime
 
@@ -9,6 +9,7 @@ class GoogleDriveFileHolder {
     var size: Long = 0
     var createdTime: DateTime? = null
     var starred: Boolean? = null
+
 
 
 }

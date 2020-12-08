@@ -73,6 +73,10 @@ dependencies {
 
     implementation group: 'io.socket', name: 'socket.io-client', version: '1.0.0'
 
+    implementation 'com.google.android.gms:play-services-vision:20.1.2'
+
+    implementation 'id.zelory:compressor:2.1.0'
+
 
 
 }

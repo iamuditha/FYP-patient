@@ -1,4 +1,4 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.camera
 
 import android.net.Uri
 

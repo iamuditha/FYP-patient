@@ -1,4 +1,4 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.camera
 
 import android.content.Context
 import android.content.Intent
@@ -10,9 +10,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.net.toUri
 import androidx.viewpager.widget.PagerAdapter
 import androidx.viewpager.widget.ViewPager
+import com.example.fyp_patient.R
 
 class FullScreenImageActivity : AppCompatActivity() {
 
