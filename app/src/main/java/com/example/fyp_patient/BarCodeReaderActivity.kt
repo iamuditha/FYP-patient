@@ -122,11 +122,11 @@ class BarCodeReaderActivity : AppCompatActivity() {
         override fun receiveDetections(detections: Detector.Detections<Barcode>?) {
 
             if (detections != null && detections.detectedItems != null){
-                val qrCodes: SparseArray<Barcode> = detections.detectedItems
-                val code = qrCodes.valueAt(0)
-                textScanResult.text = code.displayValue
-                did = code.displayValue
-                detector.release()
+//                val qrCodes: SparseArray<Barcode> = detections.detectedItems
+//                val code = qrCodes.valueAt(0)
+//                textScanResult.text = code.displayValue
+//                did = code.displayValue
+//                detector.release()
 
                 if (did != null){
 //                    cameraSource.stop()
@@ -156,7 +156,7 @@ class BarCodeReaderActivity : AppCompatActivity() {
                     if (true){
                         Log.i("cid", "validate function called")
 
-                        ChallengeResponse(did!!).challengeResponse()
+                        ChallengeResponse(did!!,"myid").challengeResponse()
                         Log.i("cid", "validabnmte function called")
 
 
