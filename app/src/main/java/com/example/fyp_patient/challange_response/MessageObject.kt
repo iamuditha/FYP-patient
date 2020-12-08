@@ -1,4 +1,4 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.challange_response
 
 import java.io.Serializable
 import java.security.SecureRandom
