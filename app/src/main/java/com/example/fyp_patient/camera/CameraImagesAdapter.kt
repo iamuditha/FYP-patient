@@ -19,11 +19,16 @@ class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, p
             itemView.title.text = cameraImagesModel.title
             itemView.date.text = cameraImagesModel.des
             itemView.recordImage.setImageURI(cameraImagesModel.uri)
-            itemView.checkbox.setOnClickListener(this)
+//            itemView.checkbox.setOnClickListener(this.)
+            itemView.uploadButton.setOnClickListener(this)
         }
 
         override fun onClick(p0: View?) {
-            (context as CameraImageRecycleViewActivity).prepareSelection(p0, adapterPosition)
+//            (context as CameraImageRecycleViewActivity).prepareSelection(p0, adapterPosition)
+            (context as CameraImageRecycleViewActivity).uploadImageIntoDrive(adapterPosition)
+
+
+
         }
     }
 
@@ -48,6 +53,9 @@ class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, p
         holder.itemView.recordImage.setOnClickListener {
             tapped(position)
         }
+//        holder.itemView.uploadButton.setOnClickListener {
+//            (context as CameraImageRecycleViewActivity).uplo
+//        }
 
         holder.itemView.setOnLongClickListener(context)
 //        holder.itemView.checkbox.setOnClickListener(this)
