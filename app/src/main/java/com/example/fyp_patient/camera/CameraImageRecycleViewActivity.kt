@@ -46,6 +46,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -191,7 +192,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
                     Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
                 }
             }
-            REQUEST_IMAGE_SELECT ->{
+            REQUEST_IMAGE_SELECT -> {
                 if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //permission from pop up was granted
                     openGallery()
@@ -216,7 +217,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
             arrayList.add((image_uri?.let {
                 CameraImagesModel(
                     "My title",
-                    "My description",
+                    getCurrentDate(),
                     it
                 )
             }!!))
@@ -228,7 +229,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         if (requestCode == IMAGE_SELECT_CODE && resultCode==Activity.RESULT_OK) {
             val uri = data?.data
             Log.i("gallery123", data?.clipData?.getItemAt(0)?.uri.toString())
-            arrayList.add(CameraImagesModel("title", "description", uri!!))
+            arrayList.add(CameraImagesModel("title", getCurrentDate(), uri!!))
             updateView()
 
         }
@@ -459,6 +460,12 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
                 println("file not Deleted :$path")
             }
         }
+    }
+
+    private fun getCurrentDate(): String{
+        val c = Calendar.getInstance().time
+        val df = SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault())
+        return df.format(c)
     }
 
     private fun readText(imageBitmap: Bitmap) {
