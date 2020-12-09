@@ -1,27 +1,22 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.challange_response
 
-import android.database.StaleDataException
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import crypto.AsymmetricEncDec
 import crypto.KeyHandler
-import crypto.PublicPrivateKeyPairGenerator
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import org.json.JSONException
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
-import java.security.Key
 import java.security.PublicKey
 import java.security.SecureRandom
 import java.util.*
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import javax.crypto.SecretKeyFactory
-import javax.crypto.spec.SecretKeySpec
 import kotlin.math.floor
 
 class ChallengeResponse(private val did: String, private val id: String
