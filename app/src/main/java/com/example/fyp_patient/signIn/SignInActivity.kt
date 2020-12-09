@@ -23,8 +23,8 @@ class SignInActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_signin)
-        var challengeResponse = ChallengeResponse("123456789","my id")
-        challengeResponse.challengeResponse();
+//        var challengeResponse = ChallengeResponse("123456789","my id")
+//        challengeResponse.challengeResponse();
         // Set the dimensions of the sign-in button.
         val signInButton = findViewById<SignInButton>(R.id.sign_in_button)
         signInButton.setSize(SignInButton.SIZE_STANDARD)

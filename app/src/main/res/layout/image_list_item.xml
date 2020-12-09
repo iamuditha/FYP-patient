@@ -35,23 +35,38 @@
             android:layout_height="2dp"
             android:background="@color/colorPrimaryDark" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
         <TextView
             android:id="@+id/title"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:text="title"
             android:textColor="@android:color/black"
             android:textSize="20sp"
             android:textStyle="bold" />
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+        <Button
+            android:id="@+id/uploadButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:text="Upload"/>
+    </LinearLayout>
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="10dp"
                 android:paddingBottom="10dp"
@@ -61,22 +76,23 @@
 
             <TextView
                 android:id="@+id/date"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingLeft="6dp"
                 android:paddingBottom="10dp"
                 android:text="date"
                 android:textSize="15sp"
                 android:textStyle="bold" />
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
             <CheckBox
                 android:id="@+id/checkbox"
-                android:layout_width="151dp"
-                android:layout_height="53dp"
-                android:layout_alignParentEnd="true"
-                android:layout_marginStart="120dp"
-                android:layout_marginEnd="4dp"
-                android:layout_toEndOf="@+id/description"
-                android:text="CheckBox" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toEndOf="@+id/description" />
 
         </LinearLayout>
 

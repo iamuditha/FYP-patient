@@ -89,7 +89,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
 
         btn.setOnClickListener {
             checkForGooglePermissions()
-            uploadImageIntoDrive()
+            uploadImageIntoDrive(0)
         }
         fab.setOnClickListener {
             getPermission()
@@ -99,6 +99,9 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
             val intent = Intent(this, BarCodeReaderActivity::class.java)
             startActivity(intent)
         }
+//        uploadButton.setOnClickListener {
+//
+//        }
 
     }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -208,9 +211,9 @@ private fun uploadPdfFile() {
         }
     }
 //
-    private fun uploadImageIntoDrive() {
+     fun uploadImageIntoDrive(position: Int) {
         val TAG = "image upload"
-        val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, arrayList[0].uri)
+        val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, arrayList[position].uri)
 
         try {
             if (bitmap == null) {
@@ -230,7 +233,7 @@ private fun uploadPdfFile() {
             val compressedImageFile = Compressor(this).compressToFile(file);
             val inputStream = FileInputStream(compressedImageFile)
             val encryptedFile = EncryptAndDecrypt().encryptFile(inputStream)
-            mDriveServiceHelper?.uploadFile(encryptedFile, "application/octet-stream", null)
+            mDriveServiceHelper?.uploadFile(compressedImageFile, "application/octet-stream", null)
                 ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
                     Log.i(
                         TAG,
