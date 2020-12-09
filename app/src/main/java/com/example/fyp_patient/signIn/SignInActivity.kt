@@ -14,6 +14,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
+import kotlinx.android.synthetic.main.activity_signin.*
 
 
 class SignInActivity : AppCompatActivity() {
@@ -27,8 +28,8 @@ class SignInActivity : AppCompatActivity() {
 //        var challengeResponse = ChallengeResponse("123456789","my id")
 //        challengeResponse.challengeResponse();
         // Set the dimensions of the sign-in button.
-        val signInButton = findViewById<SignInButton>(R.id.sign_in_button)
-        signInButton.setSize(SignInButton.SIZE_STANDARD)
+//        val signInButton = findViewById<SignInButton>(R.id.sign_in_button)
+//        sign_in_button.setSize(SignInButton.SIZE_STANDARD)
 
         // Configure sign-in to request the user's ID, email address, and basic profile. ID and basic profile are included in DEFAULT_SIGN_IN.
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -37,7 +38,7 @@ class SignInActivity : AppCompatActivity() {
 
         // Build a GoogleSignInClient with the options specified by gso.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
-        signInButton.setOnClickListener { v ->
+        sign_in_button.setOnClickListener { v ->
             when (v.id) {
                 R.id.sign_in_button -> signIn()
             }
