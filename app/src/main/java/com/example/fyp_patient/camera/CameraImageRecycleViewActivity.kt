@@ -22,8 +22,9 @@ import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.fyp_patient.*
+import com.example.fyp_patient.BarCodeReaderActivity
 import com.example.fyp_patient.EncryptAndDecrypt
+import com.example.fyp_patient.R
 import com.example.fyp_patient.drive.DriveServiceHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -49,7 +50,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickListener{
+class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickListener {
 
     var isInActionMode = false
     private val uriArrayList = ArrayList<Uri>()
@@ -57,8 +58,11 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
     private var driveServiceHelper: DriveServiceHelper? = null
     private var RC_AUTHORIZE_DRIVE = 101
     private val REQUEST_IMAGE_CAPTURE: Int = 100
+    private val REQUEST_IMAGE_SELECT: Int = 104
+
     private var image_uri: Uri? = null
-    private val IMAGE_CAPTURE_CODE: Int = 101
+    private val IMAGE_CAPTURE_CODE: Int = 103
+    private val IMAGE_SELECT_CODE : Int = 102
     private var ACCESS_DRIVE_SCOPE = Scope(Scopes.DRIVE_FILE)
     private var SCOPE_EMAIL = Scope(Scopes.EMAIL)
     var SCOPE_APP_DATA = Scope(Scopes.DRIVE_APPFOLDER)
@@ -92,8 +96,11 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
             checkForGooglePermissions()
             uploadImageIntoDrive(0)
         }
-        fab.setOnClickListener {
-            getPermission()
+        openCamera.setOnClickListener {
+            checkPermissionAndOpenCamera()
+        }
+        openGallery.setOnClickListener {
+            checkPermissionAndOpenGallery()
         }
 
         bar.setOnClickListener {
@@ -105,6 +112,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
 //        }
 
     }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         val inflater: MenuInflater = menuInflater
         inflater.inflate(R.menu.main, menu)
@@ -112,8 +120,8 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
     }
 
 
-    /***********get the permission from the device to access the camera***********/
-    private fun getPermission() {
+    //check the permissions and open the camera
+    private fun checkPermissionAndOpenCamera() {
         //if the system is marshmallow or above get the run time permission
         if (checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED ||
             checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED
@@ -130,8 +138,22 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
             openCamera()
         }
     }
-
-    /************open the device camera*************/
+    //check the permissions and open the gallery
+    private fun checkPermissionAndOpenGallery() {
+        //if the system is marshmallow or above get the run time permission
+        if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED) {
+            //permission was not enabled
+            val permission = arrayOf(
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            //show popup to request permission
+            requestPermissions(permission, REQUEST_IMAGE_SELECT)
+        } else {
+            //permission already granted
+            openGallery()
+        }
+    }
+    //open the camera and capture the image
     private fun openCamera() {
         val values = ContentValues()
         values.put(MediaStore.Images.Media.TITLE, "New Picture")
@@ -144,7 +166,15 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
         startActivityForResult(cameraIntent, IMAGE_CAPTURE_CODE)
     }
 
-    /*************call when user clicks on the permission request dialog********************/
+    //open gallery and select the image
+    private fun openGallery(){
+        val intent = Intent()
+        intent.type = "image/*"
+        intent.action = Intent.ACTION_GET_CONTENT
+        startActivityForResult(Intent.createChooser(intent, "Pictures: "), IMAGE_SELECT_CODE)
+    }
+
+    //call when user clicks on the permission request dialog
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -161,14 +191,24 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
                     Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
                 }
             }
+            REQUEST_IMAGE_SELECT ->{
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //permission from pop up was granted
+                    openGallery()
+                } else {
+                    //permission from pop up was denied
+                    Toast.makeText(this, "Permission denied", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
-    /************called when an image is captured*************/
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         //called when image is captured from camera intent
-        if (resultCode == Activity.RESULT_OK) {
+        if (requestCode == IMAGE_CAPTURE_CODE && resultCode == Activity.RESULT_OK) {
             val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, image_uri)
             readText(bitmap)
             //set the image to the image view
@@ -183,45 +223,66 @@ class CameraImageRecycleViewActivity : AppCompatActivity() , View.OnLongClickLis
             Log.i("check123", image_uri.toString())
             updateView()
         }
+
+        //call when image is selected from the gallery
+        if (requestCode == IMAGE_SELECT_CODE && resultCode==Activity.RESULT_OK) {
+            val uri = data?.data
+            Log.i("gallery123", data?.clipData?.getItemAt(0)?.uri.toString())
+            arrayList.add(CameraImagesModel("title", "description", uri!!))
+            updateView()
+
+        }
     }
 
+    //update the recycle view when new items are added
     private fun updateView() {
-//        val adapter = CameraImagesAdapter(arrayList, this)
         recycleView.layoutManager = LinearLayoutManager(this)
         recycleView.adapter = adapter
     }
-//
-private fun uploadPdfFile() {
+
+    //
+    private fun uploadPdfFile() {
         val progressDialog = ProgressDialog(this@CameraImageRecycleViewActivity)
         progressDialog.setTitle("Uploading to google Drive")
         progressDialog.setMessage("Please wait........")
         progressDialog.show()
 //        val filePath = "/storage/emulated/0/Test.jpg"
         Log.i("mypath", getPath(arrayList[0].uri))
-        driveServiceHelper!!.createFilePdf(getPath(arrayList[0].uri).toString())?.addOnSuccessListener {
-        progressDialog.dismiss()
-        Toast.makeText(applicationContext, "Uploaded Successfully", Toast.LENGTH_SHORT).show()
+        driveServiceHelper!!.createFilePdf(getPath(arrayList[0].uri).toString())
+            ?.addOnSuccessListener {
+                progressDialog.dismiss()
+                Toast.makeText(applicationContext, "Uploaded Successfully", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            ?.addOnFailureListener {
+                progressDialog.dismiss()
+                Toast.makeText(
+                    applicationContext,
+                    "Check your google Drive api key",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
     }
-        ?.addOnFailureListener {
-            progressDialog.dismiss()
-            Toast.makeText(
-                applicationContext,
-                "Check your google Drive api key",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
-    }
-//
-     fun uploadImageIntoDrive(position: Int) {
+
+    //
+    fun uploadImageIntoDrive(position: Int) {
         val TAG = "image upload"
-        val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, arrayList[position].uri)
+        val bitmap = MediaStore.Images.Media.getBitmap(
+            this.contentResolver,
+            arrayList[position].uri
+        )
 
         try {
             if (bitmap == null) {
                 Log.i(TAG, "Bitmap is null")
                 return
             }
-            val file = File(applicationContext.filesDir, UUID.randomUUID().toString().substring(0,5))
+            val file = File(
+                applicationContext.filesDir, UUID.randomUUID().toString().substring(
+                    0,
+                    5
+                )
+            )
             val bos = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos)
             val bitmapData = bos.toByteArray()
@@ -318,26 +379,26 @@ private fun uploadPdfFile() {
 //    }
 
     override fun onLongClick(view: View?): Boolean {
-        if (toolbar==null){
+        if (toolbar == null) {
             Log.i("check", "toolbar is null")
         }
         toolbar.menu.clear()
         toolbar.inflateMenu(R.menu.menu_action_mode)
-        counter_text.visibility=View.VISIBLE
-        isInActionMode=true
+        counter_text.visibility = View.VISIBLE
+        isInActionMode = true
         adapter.notifyDataSetChanged()
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         return true
     }
 
-     fun prepareSelection(view: View?, position: Int?){
-        if ((view as CheckBox).isChecked){
+    fun prepareSelection(view: View?, position: Int?) {
+        if ((view as CheckBox).isChecked) {
             selection_list.add(arrayList[position!!])
             Toast.makeText(applicationContext, position.toString(), Toast.LENGTH_SHORT).show()
             counter += 1
             updateCounter(counter)
-        }else{
+        } else {
             selection_list.remove(arrayList[position!!])
             Toast.makeText(applicationContext, position.toString(), Toast.LENGTH_SHORT).show()
             counter -= 1
@@ -346,50 +407,50 @@ private fun uploadPdfFile() {
 
     }
 
-    private fun updateCounter(counter: Int){
-        if (counter==0){
+    private fun updateCounter(counter: Int) {
+        if (counter == 0) {
             counter_text.text = "0 items are selected"
-        }else{
+        } else {
             counter_text.text = "$counter items selected"
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.item_delete){
+        if (item.itemId == R.id.item_delete) {
             adapter.updateAdapter(selection_list)
             clearActionMode()
-        }else if (item.itemId==android.R.id.home){
+        } else if (item.itemId == android.R.id.home) {
             clearActionMode()
             adapter.notifyDataSetChanged()
         }
         return true
     }
 
-    private fun clearActionMode(){
-        isInActionMode=false
+    private fun clearActionMode() {
+        isInActionMode = false
         toolbar.menu.clear()
         toolbar.inflateMenu(R.menu.main)
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        for (cameraImagesModel: CameraImagesModel in selection_list){
+        for (cameraImagesModel: CameraImagesModel in selection_list) {
             getPath(cameraImagesModel.uri)?.let { deleteImage(it) }
         }
-        counter_text.visibility=View.GONE
-        counter_text.text="0 items selected"
+        counter_text.visibility = View.GONE
+        counter_text.text = "0 items selected"
         checkbox.isChecked = false
-        counter=0
+        counter = 0
         selection_list.clear()
     }
 
     override fun onBackPressed() {
-        if (isInActionMode){
+        if (isInActionMode) {
             clearActionMode()
             adapter.notifyDataSetChanged()
-        }else{
+        } else {
             super.onBackPressed()
         }
     }
 
-    private fun deleteImage(path: String){
+    private fun deleteImage(path: String) {
         val delete = File(path)
         if (delete.exists()) {
             if (delete.delete()) {
@@ -400,7 +461,7 @@ private fun uploadPdfFile() {
         }
     }
 
-    private fun readText(imageBitmap: Bitmap){
+    private fun readText(imageBitmap: Bitmap) {
 
         val LOG_TAG = "detectedText"
         // imageBitmap is the Bitmap image you're trying to process for text
