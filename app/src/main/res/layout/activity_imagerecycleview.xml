@@ -5,14 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".camera.CameraImageRecycleViewActivity">
+    tools:context=".camera_old.CameraImageRecycleViewActivity">
 
     <include layout="@layout/toolbar_layout"></include>
+
+
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
+<!--        <com.airbnb.lottie.LottieAnimationView-->
+<!--            android:id="@+id/intro_animation"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_centerVertical="true"-->
+<!--            android:layout_centerHorizontal="true"-->
+<!--            app:lottie_rawRes="@raw/upload"-->
+<!--            app:lottie_autoPlay="true"-->
+<!--            app:lottie_loop="true"/>-->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycleView"
             android:layout_width="match_parent"
@@ -23,9 +33,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_gravity="end|bottom"
-            android:layout_margin="16dp"
+            android:layout_alignParentRight="true"
+            android:layout_margin="50dp"
+            android:backgroundTint="@color/colorPrimary"
             android:contentDescription="floating button"
+
             android:src="@drawable/camera_icon" />
 
 
@@ -33,16 +45,13 @@
             android:id="@+id/openGallery"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/openCamera"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_gravity="end|bottom"
-            android:layout_marginStart="22dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="333dp"
-            android:layout_marginBottom="38dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
             android:contentDescription="floating button"
-            android:src="@drawable/ic_launcher_background" />
+            android:layout_marginBottom="120dp"
+            android:layout_marginRight="50dp"
+            android:src="@drawable/gallery" />
 
         <Button
             android:id="@+id/btn"

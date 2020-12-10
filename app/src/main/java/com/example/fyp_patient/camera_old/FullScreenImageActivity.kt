@@ -1,4 +1,4 @@
-package com.example.fyp_patient.camera
+package com.example.fyp_patient.camera_old
 
 import android.content.Context
 import android.content.Intent

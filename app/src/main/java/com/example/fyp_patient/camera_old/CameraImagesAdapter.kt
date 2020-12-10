@@ -1,10 +1,11 @@
-package com.example.fyp_patient.camera
+package com.example.fyp_patient.camera_old
 
 import android.content.Context
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.fyp_patient.R
 import kotlinx.android.synthetic.main.image_list_item.view.*
@@ -21,14 +22,17 @@ class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, p
             itemView.recordImage.setImageURI(cameraImagesModel.uri)
 //            itemView.checkbox.setOnClickListener(this.)
             itemView.uploadButton.setOnClickListener(this)
+            itemView.deleteButton.setOnClickListener(this)
         }
 
         override fun onClick(p0: View?) {
+            if (p0!!.id == itemView.deleteButton.id){
+                Toast.makeText(context,"Tis should be removed",Toast.LENGTH_SHORT).show()
+            }
 //            (context as CameraImageRecycleViewActivity).prepareSelection(p0, adapterPosition)
-            (context as CameraImageRecycleViewActivity).uploadImageIntoDrive(adapterPosition)
-
-
-
+            if (p0!!.id == itemView.uploadButton.id){
+                (context as CameraImageRecycleViewActivity).uploadImageIntoDrive(adapterPosition)
+            }
         }
     }
 
@@ -53,6 +57,7 @@ class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, p
         holder.itemView.recordImage.setOnClickListener {
             tapped(position)
         }
+        holder
 //        holder.itemView.uploadButton.setOnClickListener {
 //            (context as CameraImageRecycleViewActivity).uplo
 //        }

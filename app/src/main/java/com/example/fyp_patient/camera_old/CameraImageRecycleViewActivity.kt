@@ -1,4 +1,4 @@
-package com.example.fyp_patient.camera
+package com.example.fyp_patient.camera_old
 
 
 import android.app.Activity
@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fyp_patient.BarCodeReaderActivity
 import com.example.fyp_patient.EncryptAndDecrypt
+import com.example.fyp_patient.OcrCaptureActivity
 import com.example.fyp_patient.R
 import com.example.fyp_patient.drive.DriveServiceHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -80,6 +81,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_imagerecycleview)
         setSupportActionBar(toolbar)
+
         updateView()
         counter_text.visibility = View.GONE
 
@@ -94,8 +96,10 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
 
 
         btn.setOnClickListener {
-            checkForGooglePermissions()
-            uploadImageIntoDrive(0)
+//            checkForGooglePermissions()
+//            uploadImageIntoDrive(0)
+            val intent = Intent(this, OcrCaptureActivity::class.java)
+            startActivity(intent)
         }
         openCamera.setOnClickListener {
             checkPermissionAndOpenCamera()
@@ -109,7 +113,8 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
             startActivity(intent)
         }
 //        uploadButton.setOnClickListener {
-//
+//            val intent = Intent(this, OcrCaptureActivity::class.java)
+//            startActivity(intent)
 //        }
 
     }
@@ -313,6 +318,8 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
             Log.i(TAG, "Exception : " + e.message)
         }
     }
+
+    fun deleteItem(){}
 
     private fun getPath(uri: Uri): String? {
         val projection =
