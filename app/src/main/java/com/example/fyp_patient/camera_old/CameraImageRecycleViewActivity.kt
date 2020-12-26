@@ -8,7 +8,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.database.Cursor
-import android.graphics.Bitmap
+import android.graphics.*
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -55,8 +55,8 @@ import kotlin.collections.ArrayList
 class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickListener {
 
     var isInActionMode = false
-    private val uriArrayList = ArrayList<Uri>()
-    val arrayList = ArrayList<CameraImagesModel>()
+//    private val uriArrayList = ArrayList<Uri>()
+//    val arrayList = ArrayList<CameraImagesModel>()
     private var driveServiceHelper: DriveServiceHelper? = null
     private var RC_AUTHORIZE_DRIVE = 101
     private val REQUEST_IMAGE_CAPTURE: Int = 100
@@ -71,7 +71,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
 
     lateinit var googleDriveService: Drive
     var mDriveServiceHelper: DriveServiceHelper? = null
-    var adapter = CameraImagesAdapter(arrayList, this)
+    var adapter = CameraImagesAdapter(ImageHolder.imageArrayList(), this)
 
     var selection_list = ArrayList<CameraImagesModel>()
     var counter = 0
@@ -218,14 +218,8 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
             val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, image_uri)
             readText(bitmap)
             //set the image to the image view
-            image_uri?.let { uriArrayList.add(it) }
-            arrayList.add((image_uri?.let {
-                CameraImagesModel(
-                    "My title",
-                    getCurrentDate(),
-                    it
-                )
-            }!!))
+            ImageURIHolder.addUri(image_uri!!)
+            ImageHolder.addImage(CameraImagesModel("title",getCurrentDate(),image_uri!!))
             Log.i("check123", image_uri.toString())
             updateView()
         }
@@ -233,8 +227,10 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         //call when image is selected from the gallery
         if (requestCode == IMAGE_SELECT_CODE && resultCode==Activity.RESULT_OK) {
             val uri = data?.data
+            val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver,uri)
+            readText(bitmap)
             Log.i("gallery123", data?.clipData?.getItemAt(0)?.uri.toString())
-            arrayList.add(CameraImagesModel("title", getCurrentDate(), uri!!))
+            ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri!!))
             updateView()
 
         }
@@ -253,8 +249,8 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         progressDialog.setMessage("Please wait........")
         progressDialog.show()
 //        val filePath = "/storage/emulated/0/Test.jpg"
-        Log.i("mypath", getPath(arrayList[0].uri))
-        driveServiceHelper!!.createFilePdf(getPath(arrayList[0].uri).toString())
+        Log.i("mypath", getPath(ImageHolder.imageArrayList()[0].uri))
+        driveServiceHelper!!.createFilePdf(getPath(ImageHolder.imageArrayList()[0].uri).toString())
             ?.addOnSuccessListener {
                 progressDialog.dismiss()
                 Toast.makeText(applicationContext, "Uploaded Successfully", Toast.LENGTH_SHORT)
@@ -275,7 +271,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         val TAG = "image upload"
         val bitmap = MediaStore.Images.Media.getBitmap(
             this.contentResolver,
-            arrayList[position].uri
+            ImageHolder.imageArrayList()[position].uri
         )
 
         try {
@@ -402,12 +398,12 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
 
     fun prepareSelection(view: View?, position: Int?) {
         if ((view as CheckBox).isChecked) {
-            selection_list.add(arrayList[position!!])
+            selection_list.add(ImageHolder.imageArrayList()[position!!])
             Toast.makeText(applicationContext, position.toString(), Toast.LENGTH_SHORT).show()
             counter += 1
             updateCounter(counter)
         } else {
-            selection_list.remove(arrayList[position!!])
+            selection_list.remove(ImageHolder.imageArrayList()[position!!])
             Toast.makeText(applicationContext, position.toString(), Toast.LENGTH_SHORT).show()
             counter -= 1
             updateCounter(counter)
@@ -508,5 +504,19 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
                 }
             }
         }
+    }
+
+    fun toGrayscale(bmpOriginal: Bitmap): Bitmap? {
+        val height: Int = bmpOriginal.height
+        val width: Int = bmpOriginal.width
+        val bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val c = Canvas(bmpGrayscale)
+        val paint = Paint()
+        val cm = ColorMatrix()
+        cm.setSaturation(0F)
+        val f = ColorMatrixColorFilter(cm)
+        paint.colorFilter = f
+        c.drawBitmap(bmpOriginal, 0F, 0F, paint)
+        return bmpGrayscale
     }
 }
