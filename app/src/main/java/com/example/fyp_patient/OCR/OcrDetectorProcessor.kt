@@ -1,4 +1,4 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.OCR
 
 import android.util.Log
 import com.example.fyp_patient.camera.GraphicOverlay
@@ -24,7 +24,8 @@ class OcrDetectorProcessor internal constructor(ocrGraphicOverlay: GraphicOverla
             val item = items.valueAt(i)
             if (item != null && item.value != null) {
                 Log.d("OcrDetectorProcessor", "Text detected! " + item.value)
-                val graphic = OcrGraphic(graphicOverlay, item)
+                val graphic =
+                    OcrGraphic(graphicOverlay, item)
                 graphicOverlay.add(graphic)
             }
         }

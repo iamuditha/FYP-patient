@@ -1,11 +1,9 @@
-package com.example.fyp_patient
+package com.example.fyp_patient.OCR
 
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
@@ -28,12 +26,16 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.example.fyp_patient.R
 import com.example.fyp_patient.camera.CameraSource
 import com.example.fyp_patient.camera.CameraSourcePreview
 import com.example.fyp_patient.camera.GraphicOverlay
+import com.example.fyp_patient.camera_old.CameraImageRecycleViewActivity
+import com.example.fyp_patient.camera_old.CameraImagesModel
+import com.example.fyp_patient.camera_old.ImageHolder
+import com.example.fyp_patient.camera_old.ImageURIHolder
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.vision.text.TextBlock
@@ -110,6 +112,10 @@ class OcrCaptureActivity : AppCompatActivity() {
                     imageView!!.minimumHeight = dm.heightPixels
                     imageView!!.minimumWidth = dm.widthPixels
                     imageView!!.setImageBitmap(bm)
+
+                    val intent = Intent(applicationContext,CameraImageRecycleViewActivity::class.java)
+                    intent.putExtra("ocrImageURI",uri)
+                    startActivity(intent)
                 }
             })
         }

@@ -24,7 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.fyp_patient.BarCodeReaderActivity
 import com.example.fyp_patient.EncryptAndDecrypt
-import com.example.fyp_patient.OcrCaptureActivity
+import com.example.fyp_patient.OCR.OcrCaptureActivity
 import com.example.fyp_patient.R
 import com.example.fyp_patient.drive.DriveServiceHelper
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -81,6 +81,17 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_imagerecycleview)
         setSupportActionBar(toolbar)
+
+        Log.i("hellloworld","on create called")
+        val intent = intent
+        val bundle = intent.extras
+        if (bundle != null){
+            val uri = bundle.get("ocrImageURI")
+            Log.i("hellloworld","i am called")
+            ImageURIHolder.addUri(uri as Uri)
+            ImageHolder.addImage(CameraImagesModel("title",getCurrentDate(), uri))
+            updateView()
+        }
 
         updateView()
         counter_text.visibility = View.GONE
