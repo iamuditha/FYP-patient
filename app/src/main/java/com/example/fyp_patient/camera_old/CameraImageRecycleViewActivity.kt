@@ -15,17 +15,13 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.util.SparseArray
-import android.view.Menu
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
-import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.bumptech.glide.Glide
 import com.example.fyp_patient.BarCodeReaderActivity
 import com.example.fyp_patient.BaseActivity
 import com.example.fyp_patient.EncryptAndDecrypt
@@ -125,20 +121,20 @@ class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener 
         checkForGooglePermissions()
 
 
-        btn.setOnClickListener {
-            val intent = Intent(this, OcrCaptureActivity::class.java)
-            startActivity(intent)
-        }
         openCamera.setOnClickListener {
-            checkPermissionAndOpenCamera()
+            val ocrIntent = Intent(this, OcrCaptureActivity::class.java)
+            startActivity(ocrIntent)
         }
+//        openCamera.setOnClickListener {
+//            checkPermissionAndOpenCamera()
+//        }
         openGallery.setOnClickListener {
             checkPermissionAndOpenGallery()
         }
 
         bar.setOnClickListener {
-            val intent = Intent(this, BarCodeReaderActivity::class.java)
-            startActivity(intent)
+            val barCodeIntent = Intent(this, BarCodeReaderActivity::class.java)
+            startActivity(barCodeIntent)
         }
 
     }

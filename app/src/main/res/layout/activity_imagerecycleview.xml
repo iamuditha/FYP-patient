@@ -69,11 +69,11 @@
                     android:contentDescription="floating button"
                     android:src="@drawable/gallery" />
 
-                <Button
-                    android:id="@+id/btn"
-                    android:layout_width="181dp"
-                    android:layout_height="59dp"
-                    android:text="upload something" />
+<!--                <Button-->
+<!--                    android:id="@+id/btn"-->
+<!--                    android:layout_width="181dp"-->
+<!--                    android:layout_height="59dp"-->
+<!--                    android:text="upload something" />-->
 
                 <Button
                     android:id="@+id/bar"
