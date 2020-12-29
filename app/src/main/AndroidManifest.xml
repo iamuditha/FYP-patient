@@ -20,32 +20,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".OCR.OcrCaptureActivity"></activity>
-        <!-- <uses-library -->
-        <!-- android:name="com.google.android.wearable" -->
-        <!-- android:required="true" /> -->
-        <!--
-               Set to true if your app is Standalone, that is, it does not require the handheld
-               app to run.
-        -->
-        <!-- <meta-data -->
-        <!-- android:name="com.google.android.wearable.standalone" -->
-        <!-- android:value="true" /> -->
+        <activity android:name=".OCR.OcrCaptureActivity" />
+
         <activity
             android:name=".DisplayDoctorDetailsActivity"
-            android:theme="@style/AppTheme.winningTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/AppTheme.winningTheme" />
         <activity android:name=".BarCodeReaderActivity" />
         <activity android:name=".camera_old.FullScreenImageActivity" /> <!-- <activity -->
-        <!-- android:name=".camra.FullscreenActivity" -->
-        <!-- android:configChanges="orientation|keyboardHidden|screenSize" -->
-        <!-- android:label="@string/title_activity_fullscreen" -->
-        <!-- android:theme="@style/FullscreenTheme" /> -->
+
         <activity android:name=".signIn.SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -53,9 +35,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".camera_old.CameraImageRecycleViewActivity"
+        <activity
+            android:name=".camera_old.CameraImageRecycleViewActivity"
             android:screenOrientation="sensorPortrait"
-            android:theme="@style/newAppTheme"/>
+            android:theme="@style/newAppTheme" />
     </application>
 
 </manifest>
