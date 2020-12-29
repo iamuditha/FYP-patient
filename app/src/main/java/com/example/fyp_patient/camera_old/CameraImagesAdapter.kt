@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.fyp_patient.R
 import kotlinx.android.synthetic.main.image_list_item.view.*
 
@@ -19,13 +20,21 @@ class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, p
         fun bindItems(cameraImagesModel: CameraImagesModel) {
             itemView.title.text = cameraImagesModel.title
             itemView.date.text = cameraImagesModel.des
-            itemView.recordImage.setImageURI(cameraImagesModel.uri)
+//            itemView.recordImage.setImageURI(cameraImagesModel.uri)
+
 //            itemView.checkbox.setOnClickListener(this.)
             itemView.uploadButton.setOnClickListener(this)
             itemView.deleteButton.setOnClickListener(this)
+            itemView.recordImage.setOnClickListener(this)
+            Glide.with(context).load(cameraImagesModel.uri).into(itemView.recordImage)
         }
 
         override fun onClick(p0: View?) {
+//            if (p0!!.id == itemView.recordImage.id){
+//                (context as CameraImageRecycleViewActivity).tapped(adapterPosition)
+////                Toast.makeText(context,"clicked",Toast.LENGTH_SHORT).show()
+//
+//            }
             if (p0!!.id == itemView.deleteButton.id){
                 Toast.makeText(context,"Tis should be removed",Toast.LENGTH_SHORT).show()
             }
@@ -33,6 +42,7 @@ class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, p
             if (p0!!.id == itemView.uploadButton.id){
                 (context as CameraImageRecycleViewActivity).uploadImageIntoDrive(adapterPosition)
             }
+
         }
     }
 
@@ -73,10 +83,10 @@ class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, p
         notifyDataSetChanged()
     }
 
-    private fun tapped(position: Int) {
+     fun tapped(position: Int) {
         val intent = Intent(context, FullScreenImageActivity::class.java)
         intent.putExtra("position", position)
-        intent.putStringArrayListExtra("url", uriList(arrayList))
+//        intent.putStringArrayListExtra("url", uriList(arrayList))
         context.startActivity(intent)
     }
 

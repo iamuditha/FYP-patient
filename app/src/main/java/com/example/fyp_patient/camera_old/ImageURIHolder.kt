@@ -1,6 +1,7 @@
 package com.example.fyp_patient.camera_old
 
 import android.net.Uri
+import android.util.Log
 
 object ImageURIHolder {
 
@@ -8,6 +9,7 @@ object ImageURIHolder {
 
     fun addUri(uri: Uri): ArrayList<Uri> {
         uriArrayList.add(uri)
+        Log.i("full","item added")
         return uriArrayList
     }
 

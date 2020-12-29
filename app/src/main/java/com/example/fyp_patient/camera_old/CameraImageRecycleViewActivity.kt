@@ -9,6 +9,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.*
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -22,6 +23,7 @@ import android.widget.CheckBox
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.example.fyp_patient.BarCodeReaderActivity
 import com.example.fyp_patient.EncryptAndDecrypt
 import com.example.fyp_patient.OCR.OcrCaptureActivity
@@ -82,14 +84,12 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         setContentView(R.layout.activity_imagerecycleview)
         setSupportActionBar(toolbar)
 
-        Log.i("hellloworld","on create called")
         val intent = intent
         val bundle = intent.extras
         if (bundle != null){
             val uri = bundle.get("ocrImageURI")
-            Log.i("hellloworld","i am called")
-            ImageURIHolder.addUri(uri as Uri)
-            ImageHolder.addImage(CameraImagesModel("title",getCurrentDate(), uri))
+//            ImageURIHolder.addUri(uri as Uri)
+            ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri as Uri))
             updateView()
         }
 
@@ -107,8 +107,6 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
 
 
         btn.setOnClickListener {
-//            checkForGooglePermissions()
-//            uploadImageIntoDrive(0)
             val intent = Intent(this, OcrCaptureActivity::class.java)
             startActivity(intent)
         }
@@ -123,10 +121,6 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
             val intent = Intent(this, BarCodeReaderActivity::class.java)
             startActivity(intent)
         }
-//        uploadButton.setOnClickListener {
-//            val intent = Intent(this, OcrCaptureActivity::class.java)
-//            startActivity(intent)
-//        }
 
     }
 
@@ -230,7 +224,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
             readText(bitmap)
             //set the image to the image view
             ImageURIHolder.addUri(image_uri!!)
-            ImageHolder.addImage(CameraImagesModel("title",getCurrentDate(),image_uri!!))
+            ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), image_uri!!))
             Log.i("check123", image_uri.toString())
             updateView()
         }
@@ -238,7 +232,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         //call when image is selected from the gallery
         if (requestCode == IMAGE_SELECT_CODE && resultCode==Activity.RESULT_OK) {
             val uri = data?.data
-            val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver,uri)
+            val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
             readText(bitmap)
             Log.i("gallery123", data?.clipData?.getItemAt(0)?.uri.toString())
             ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri!!))
@@ -326,8 +320,6 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         }
     }
 
-    fun deleteItem(){}
-
     private fun getPath(uri: Uri): String? {
         val projection =
             arrayOf(MediaStore.Images.Media.DATA)
@@ -380,18 +372,6 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
             .build()
         mDriveServiceHelper = DriveServiceHelper(googleDriveService)
     }
-
-//    private fun createFolderInDrive() {
-//        Log.i("login info", "Creating a Folder...")
-//        mDriveServiceHelper!!.createFolder("help me please", null)
-//            .addOnSuccessListener { googleDriveFileHolder ->
-//                val gson = Gson()
-//                Log.i("login info", "onSuccess of Folder creation: " + gson.toJson(googleDriveFileHolder))
-//            }
-//            .addOnFailureListener { e ->
-//                Log.i("login info", "onFailure of Folder creation: " + e.message)
-//            }
-//    }
 
     override fun onLongClick(view: View?): Boolean {
         if (toolbar == null) {
@@ -529,5 +509,40 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         paint.colorFilter = f
         c.drawBitmap(bmpOriginal, 0F, 0F, paint)
         return bmpGrayscale
+    }
+
+
+     fun tapped(position: Int) {
+        val intent = Intent(applicationContext, FullScreenImageActivity::class.java)
+        intent.putExtra("position", position)
+        startActivity(intent)
+
+    }
+
+    fun detectRotation(bitmap: Bitmap, uri: Uri){
+
+        val photoPath = getPath(uri)
+        val ei = ExifInterface(photoPath)
+        val orientation: Int = ei.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_UNDEFINED
+        )
+
+        var rotatedBitmap: Bitmap? = null
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270)
+            ExifInterface.ORIENTATION_NORMAL -> bitmap
+        }
+    }
+
+    private fun rotateImage(source: Bitmap, angle: Int): Bitmap? {
+        val matrix = Matrix()
+        matrix.postRotate(angle.toFloat())
+        return Bitmap.createBitmap(
+            source, 0, 0, source.width, source.height,
+            matrix, true
+        )
     }
 }

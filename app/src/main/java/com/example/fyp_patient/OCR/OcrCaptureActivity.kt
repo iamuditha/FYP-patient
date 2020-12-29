@@ -7,15 +7,17 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.database.Cursor
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.hardware.Camera
+import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.OnInitListener
-import android.util.DisplayMetrics
 import android.util.Log
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
@@ -33,14 +35,13 @@ import com.example.fyp_patient.camera.CameraSource
 import com.example.fyp_patient.camera.CameraSourcePreview
 import com.example.fyp_patient.camera.GraphicOverlay
 import com.example.fyp_patient.camera_old.CameraImageRecycleViewActivity
-import com.example.fyp_patient.camera_old.CameraImagesModel
-import com.example.fyp_patient.camera_old.ImageHolder
 import com.example.fyp_patient.camera_old.ImageURIHolder
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.vision.text.TextBlock
 import com.google.android.gms.vision.text.TextRecognizer
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.android.synthetic.main.activity_ocr_capture.*
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
@@ -67,8 +68,8 @@ class OcrCaptureActivity : AppCompatActivity() {
         setContentView(R.layout.activity_ocr_capture)
         preview = findViewById(R.id.preview) as CameraSourcePreview?
         graphicOverlay = findViewById(R.id.graphicOverlay) as GraphicOverlay<OcrGraphic>?
-        capture = findViewById(R.id.capture) as Button
-        imageView = findViewById(R.id.cimage) as ImageView
+//        capture = findViewById(R.id.capture) as ImageButton
+//        imageView = findViewById(R.id.cimage) as ImageView
 
 
         // Set good defaults for capturing text.
@@ -101,20 +102,24 @@ class OcrCaptureActivity : AppCompatActivity() {
             }
         }
         tts = TextToSpeech(this.applicationContext, listener)
-        capture!!.setOnClickListener {
-            cameraSource!!.takePicture(null, object: CameraSource.PictureCallback{
+        captureImage!!.setOnClickListener {
+            cameraSource!!.takePicture(null, object : CameraSource.PictureCallback {
                 override fun onPictureTaken(data: ByteArray) {
                     val bm = BitmapFactory.decodeByteArray(data, 0, data.size)
-                    val uri = getImageUri(applicationContext, bm)
+                    var uri = getImageUri(applicationContext, bm)
                     Log.i("myuri123", uri.toString())
-                    val dm = DisplayMetrics()
-                    windowManager.defaultDisplay.getMetrics(dm)
-                    imageView!!.minimumHeight = dm.heightPixels
-                    imageView!!.minimumWidth = dm.widthPixels
-                    imageView!!.setImageBitmap(bm)
-
-                    val intent = Intent(applicationContext,CameraImageRecycleViewActivity::class.java)
-                    intent.putExtra("ocrImageURI",uri)
+//                    val dm = DisplayMetrics()
+//                    windowManager.defaultDisplay.getMetrics(dm)
+//                    imageView!!.minimumHeight = dm.heightPixels
+//                    imageView!!.minimumWidth = dm.widthPixels
+//                    imageView!!.setImageBitmap(bm)
+//                    uri = getTheImageUri(applicationContext,detectRotation(uri))
+                    val intent = Intent(
+                        applicationContext,
+                        CameraImageRecycleViewActivity::class.java
+                    )
+                    intent.putExtra("ocrImageURI", uri)
+                    ImageURIHolder.addUri(uri)
                     startActivity(intent)
                 }
             })
@@ -418,5 +423,50 @@ class OcrCaptureActivity : AppCompatActivity() {
         const val AutoFocus = "AutoFocus"
         const val UseFlash = "UseFlash"
         const val TextBlockObject = "String"
+    }
+
+
+    private fun getPath(uri: Uri): String? {
+        val projection =
+            arrayOf(MediaStore.Images.Media.DATA)
+        val cursor: Cursor = contentResolver.query(uri, projection, null, null, null)!!
+        val column_index: Int = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+        cursor.moveToFirst()
+        return cursor.getString(column_index)
+    }
+
+    private fun detectRotation(uri: Uri) {
+        val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+        val photoPath = getPath(uri)
+        val ei = ExifInterface(photoPath)
+        val orientation: Int = ei.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_UNDEFINED
+        )
+
+        var rotatedBitmap: Bitmap? = null
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270)
+            ExifInterface.ORIENTATION_NORMAL -> bitmap
+        }
+    }
+
+    private fun rotateImage(source: Bitmap, angle: Int): Bitmap? {
+        val matrix = Matrix()
+        matrix.postRotate(angle.toFloat())
+        return Bitmap.createBitmap(
+            source, 0, 0, source.width, source.height,
+            matrix, true
+        )
+    }
+
+    fun getTheImageUri(context: Context, inImage: Bitmap): Uri? {
+        val bytes = ByteArrayOutputStream()
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
+        val path =
+            MediaStore.Images.Media.insertImage(context.contentResolver, inImage, "Title", null)
+        return Uri.parse(path)
     }
 }
