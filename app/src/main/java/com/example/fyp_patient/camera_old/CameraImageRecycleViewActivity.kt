@@ -21,10 +21,13 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.CheckBox
 import android.widget.Toast
+import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.fyp_patient.BarCodeReaderActivity
+import com.example.fyp_patient.BaseActivity
 import com.example.fyp_patient.EncryptAndDecrypt
 import com.example.fyp_patient.OCR.OcrCaptureActivity
 import com.example.fyp_patient.R
@@ -44,6 +47,7 @@ import com.google.api.services.drive.Drive
 import id.zelory.compressor.Compressor
 import kotlinx.android.synthetic.main.activity_imagerecycleview.*
 import kotlinx.android.synthetic.main.image_list_item.*
+import kotlinx.android.synthetic.main.toolbar.*
 import kotlinx.android.synthetic.main.toolbar_layout.*
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -54,7 +58,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickListener {
+class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener {
 
     var isInActionMode = false
 //    private val uriArrayList = ArrayList<Uri>()
@@ -75,14 +79,29 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
     var mDriveServiceHelper: DriveServiceHelper? = null
     var adapter = CameraImagesAdapter(ImageHolder.imageArrayList(), this)
 
-    var selection_list = ArrayList<CameraImagesModel>()
+    private var selection_list = ArrayList<CameraImagesModel>()
     var counter = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_imagerecycleview)
-        setSupportActionBar(toolbar)
+
+        //toolbar and drawer setup
+        (R.id.toolbar_main)
+        setSupportActionBar(toolbar_main)
+        val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
+
+        val actionBarDrawerToggle = ActionBarDrawerToggle(
+            this,
+            drawerLayout,
+            toolbar_main,
+            R.string.open,
+            R.string.close
+        )
+        drawerLayout.addDrawerListener(actionBarDrawerToggle)
+        actionBarDrawerToggle.syncState()
+        supportActionBar?.setHomeButtonEnabled(true)
 
         val intent = intent
         val bundle = intent.extras
@@ -94,7 +113,7 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
         }
 
         updateView()
-        counter_text.visibility = View.GONE
+//        counter_text.visibility = View.GONE
 
         val gso =
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -124,11 +143,11 @@ class CameraImageRecycleViewActivity : AppCompatActivity(), View.OnLongClickList
 
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater: MenuInflater = menuInflater
-        inflater.inflate(R.menu.main, menu)
-        return true
-    }
+//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+//        val inflater: MenuInflater = menuInflater
+//        inflater.inflate(R.menu.main, menu)
+//        return true
+//    }
 
 
     //check the permissions and open the camera
