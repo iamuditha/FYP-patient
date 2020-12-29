@@ -27,4 +27,7 @@
     <string name="ocr_failure">No text captured</string>
     <string name="ocr_error">"Error reading text: %1$s"</string>
 
+    <string name="open">OPEN</string>
+    <string name="close">CLOSE</string>
+
 </resources>

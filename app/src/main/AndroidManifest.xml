@@ -53,7 +53,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".camera_old.CameraImageRecycleViewActivity" />
+        <activity android:name=".camera_old.CameraImageRecycleViewActivity"
+            android:screenOrientation="sensorPortrait"
+            android:theme="@style/newAppTheme"/>
     </application>
 
 </manifest>
