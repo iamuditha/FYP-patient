@@ -103,7 +103,6 @@ class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener 
         val bundle = intent.extras
         if (bundle != null){
             val uri = bundle.get("ocrImageURI")
-//            ImageURIHolder.addUri(uri as Uri)
             ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri as Uri))
             updateView()
         }
