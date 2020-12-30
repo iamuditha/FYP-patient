@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@android:color/white"
-        android:text="Travelling"
+        android:text="Patient Name"
         android:textSize="24sp"/>
 
     <TextView
