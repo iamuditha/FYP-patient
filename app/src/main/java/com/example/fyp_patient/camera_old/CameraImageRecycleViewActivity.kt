@@ -6,6 +6,7 @@ import android.app.ProgressDialog
 import android.content.ContentValues
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.*
@@ -18,10 +19,14 @@ import android.util.SparseArray
 import android.view.MenuItem
 import android.view.View
 import android.widget.CheckBox
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.example.fyp_patient.BarCodeReaderActivity
 import com.example.fyp_patient.BaseActivity
 import com.example.fyp_patient.EncryptAndDecrypt
@@ -36,6 +41,7 @@ import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.vision.Frame
 import com.google.android.gms.vision.text.TextBlock
 import com.google.android.gms.vision.text.TextRecognizer
+import com.google.android.material.navigation.NavigationView
 import com.google.api.client.extensions.android.http.AndroidHttp
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.json.gson.GsonFactory
@@ -98,6 +104,23 @@ class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener 
         drawerLayout.addDrawerListener(actionBarDrawerToggle)
         actionBarDrawerToggle.syncState()
         supportActionBar?.setHomeButtonEnabled(true)
+
+
+        var prefs: SharedPreferences = getSharedPreferences("PROFILE_DATA", MODE_PRIVATE)
+        var name: String? = prefs.getString("name", "No name defined")
+        var email: String? = prefs.getString("email", "no email")
+        var url: String? = prefs.getString("url", "no url")
+
+        val navigationView: NavigationView = findViewById<View>(R.id.nav_view) as NavigationView
+        val headerView: View = navigationView.getHeaderView(0)
+        val navUsername = headerView.findViewById(R.id.doctorName) as TextView
+        val navUseremail = headerView.findViewById(R.id.doctorEmail) as TextView
+        val navUserImage = headerView.findViewById(R.id.doctorImage) as ImageView
+
+
+        navUsername.text = name
+        navUseremail.text = email
+        Glide.with(this).load(url).apply(RequestOptions.circleCropTransform()).into(navUserImage)
 
         val intent = intent
         val bundle = intent.extras
