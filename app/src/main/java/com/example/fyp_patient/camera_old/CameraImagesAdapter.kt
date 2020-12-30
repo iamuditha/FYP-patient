@@ -72,8 +72,8 @@ class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, p
 //            (context as CameraImageRecycleViewActivity).uplo
 //        }
 
-        holder.itemView.setOnLongClickListener(context)
-//        holder.itemView.checkbox.setOnClickListener(this)
+//        holder.itemView.setOnLongClickListener(context)
+////        holder.itemView.checkbox.setOnClickListener(this)
     }
 
     fun updateAdapter(list: ArrayList<CameraImagesModel>) {

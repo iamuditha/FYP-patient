@@ -2,7 +2,7 @@ package com.example.fyp_patient
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -15,14 +15,19 @@ open class BaseActivity : AppCompatActivity() {
 
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        Log.i("checklogout","i am called 0")
+
         val inflater = menuInflater
         inflater.inflate(R.menu.main_menu, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.i("checklogout","i am called")
         when (item.itemId) {
+
             R.id.logout -> {
+                Log.i("checklogout","i am called 1")
                 val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestEmail()
                     .build()
@@ -34,8 +39,6 @@ open class BaseActivity : AppCompatActivity() {
                     }).addOnFailureListener {
                         Toast.makeText(this, "Issue with Logout", Toast.LENGTH_SHORT).show()
                     }
-
-
             }
         }
         return true

@@ -3,7 +3,7 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/recordList"
+            android:id="@+id/logout1"
             android:title="LogOut"
             android:icon="@mipmap/ic_launcher_round"/>
 

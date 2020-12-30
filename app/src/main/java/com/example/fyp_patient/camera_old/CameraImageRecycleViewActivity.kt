@@ -23,6 +23,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
@@ -60,7 +61,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener {
+class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickListener{
 
     var isInActionMode = false
 //    private val uriArrayList = ArrayList<Uri>()
@@ -84,10 +85,15 @@ class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener 
     private var selection_list = ArrayList<CameraImagesModel>()
     var counter = 0
 
+    var gso: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestEmail()
+        .build()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_imagerecycleview)
+
 
         //toolbar and drawer setup
         (R.id.toolbar_main)
@@ -105,7 +111,6 @@ class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener 
         actionBarDrawerToggle.syncState()
         supportActionBar?.setHomeButtonEnabled(true)
 
-
         var prefs: SharedPreferences = getSharedPreferences("PROFILE_DATA", MODE_PRIVATE)
         var name: String? = prefs.getString("name", "No name defined")
         var email: String? = prefs.getString("email", "no email")
@@ -116,7 +121,6 @@ class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener 
         val navUsername = headerView.findViewById(R.id.doctorName) as TextView
         val navUseremail = headerView.findViewById(R.id.doctorEmail) as TextView
         val navUserImage = headerView.findViewById(R.id.doctorImage) as ImageView
-
 
         navUsername.text = name
         navUseremail.text = email
@@ -410,19 +414,19 @@ class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener 
         mDriveServiceHelper = DriveServiceHelper(googleDriveService)
     }
 
-    override fun onLongClick(view: View?): Boolean {
-        if (toolbar == null) {
-            Log.i("check", "toolbar is null")
-        }
-        toolbar.menu.clear()
-        toolbar.inflateMenu(R.menu.menu_action_mode)
-        counter_text.visibility = View.VISIBLE
-        isInActionMode = true
-        adapter.notifyDataSetChanged()
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        return true
-    }
+//    override fun onLongClick(view: View?): Boolean {
+//        if (toolbar == null) {
+//            Log.i("check", "toolbar is null")
+//        }
+//        toolbar.menu.clear()
+//        toolbar.inflateMenu(R.menu.menu_action_mode)
+//        counter_text.visibility = View.VISIBLE
+//        isInActionMode = true
+//        adapter.notifyDataSetChanged()
+//        supportActionBar?.setDisplayShowHomeEnabled(true)
+//        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+//        return true
+//    }
 
     fun prepareSelection(view: View?, position: Int?) {
         if ((view as CheckBox).isChecked) {
@@ -447,35 +451,35 @@ class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener 
         }
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.item_delete) {
-            adapter.updateAdapter(selection_list)
-            clearActionMode()
-        } else if (item.itemId == android.R.id.home) {
-            clearActionMode()
-            adapter.notifyDataSetChanged()
-        }
-        return true
-    }
-
-    private fun clearActionMode() {
-        isInActionMode = false
-        toolbar.menu.clear()
-        toolbar.inflateMenu(R.menu.main)
-        supportActionBar?.setDisplayHomeAsUpEnabled(false)
-        for (cameraImagesModel: CameraImagesModel in selection_list) {
-            getPath(cameraImagesModel.uri)?.let { deleteImage(it) }
-        }
-        counter_text.visibility = View.GONE
-        counter_text.text = "0 items selected"
-        checkbox.isChecked = false
-        counter = 0
-        selection_list.clear()
-    }
+//    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+//        if (item.itemId == R.id.item_delete) {
+//            adapter.updateAdapter(selection_list)
+//            clearActionMode()
+//        } else if (item.itemId == android.R.id.home) {
+//            clearActionMode()
+//            adapter.notifyDataSetChanged()
+//        }
+//        return true
+//    }
+//
+//    private fun clearActionMode() {
+//        isInActionMode = false
+//        toolbar.menu.clear()
+//        toolbar.inflateMenu(R.menu.main)
+//        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+//        for (cameraImagesModel: CameraImagesModel in selection_list) {
+//            getPath(cameraImagesModel.uri)?.let { deleteImage(it) }
+//        }
+//        counter_text.visibility = View.GONE
+//        counter_text.text = "0 items selected"
+//        checkbox.isChecked = false
+//        counter = 0
+//        selection_list.clear()
+//    }
 
     override fun onBackPressed() {
         if (isInActionMode) {
-            clearActionMode()
+//            clearActionMode()
             adapter.notifyDataSetChanged()
         } else {
             super.onBackPressed()
@@ -582,4 +586,32 @@ class CameraImageRecycleViewActivity : BaseActivity(), View.OnLongClickListener 
             matrix, true
         )
     }
+
+    override fun onMenuItemClick(item: MenuItem?): Boolean {
+        Log.i("drawerfunctions", "asdfghj")
+        when (item!!.itemId) {
+            R.id.logout1 -> {
+                Toast.makeText(this, "Logout Successfully hahaha", Toast.LENGTH_SHORT).show()
+                Log.i("drawerfunctions", "I am clicked")
+                return true
+            }
+
+        }
+        return true
+    }
+
+//    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+//        when (item.itemId) {
+//            R.id.logout1 -> {
+//                Log.i("mlogout","logout")
+//                Toast.makeText(applicationContext, "Logout Called", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+////        drawerLayout.closeDrawer(GravityCompat.START);
+//        return true;
+//    }
+//    private fun setNavigationViewListener() {
+//        val navigationView = findViewById<View>(R.id.nav_view) as NavigationView
+//        navigationView.setNavigationItemSelectedListener(this)
+//    }
 }
