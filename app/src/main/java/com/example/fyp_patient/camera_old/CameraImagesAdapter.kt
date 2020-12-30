@@ -36,7 +36,7 @@ class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, p
 //
 //            }
             if (p0!!.id == itemView.deleteButton.id){
-                Toast.makeText(context,"Tis should be removed",Toast.LENGTH_SHORT).show()
+                (context as CameraImageRecycleViewActivity).removeItem(adapterPosition)
             }
 //            (context as CameraImageRecycleViewActivity).prepareSelection(p0, adapterPosition)
             if (p0!!.id == itemView.uploadButton.id){

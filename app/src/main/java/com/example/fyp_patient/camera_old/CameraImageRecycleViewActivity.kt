@@ -600,6 +600,12 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         return true
     }
 
+    fun removeItem(position: Int){
+        ImageHolder.removeImage(position)
+        ImageURIHolder.removeUri(position)
+        updateView()
+    }
+
 //    override fun onNavigationItemSelected(item: MenuItem): Boolean {
 //        when (item.itemId) {
 //            R.id.logout1 -> {

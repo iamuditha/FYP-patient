@@ -58,28 +58,12 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
-            <Button
-                android:id="@+id/deleteButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"
-                android:text="Delete"
-                android:textColor="#FFFFFF"
-                android:background="@drawable/cus_button" />
 
-            <Button
-                android:id="@+id/uploadButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="3dp"
-                android:text="Upload"
-                android:textColor="#FFFFFF"
-                android:background="@drawable/cus_button" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="26dp"
+            android:layout_height="wrap_content"
             android:orientation="horizontal">
 
             <TextView
@@ -113,6 +97,33 @@
                 android:layout_toEndOf="@+id/description" />
 
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+            <Button
+                android:id="@+id/deleteButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="3dp"
+                android:text="Delete"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/cus_button" />
+
+            <Button
+                android:id="@+id/uploadButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="3dp"
+                android:text="Upload"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/cus_button" />
+        </LinearLayout>
+
 
         <GridLayout
             android:columnCount="2"

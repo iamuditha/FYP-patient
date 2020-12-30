@@ -13,6 +13,11 @@ object ImageURIHolder {
         return uriArrayList
     }
 
+    fun removeUri(position : Int): ArrayList<Uri> {
+        uriArrayList.removeAt(position)
+        return uriArrayList
+    }
+
     fun uriArrayList(): ArrayList<Uri> {
         return uriArrayList
     }

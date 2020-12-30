@@ -9,6 +9,11 @@ object ImageHolder {
         return imageArrayList
     }
 
+    fun removeImage(position: Int): ArrayList<CameraImagesModel> {
+        imageArrayList.removeAt(position)
+        return imageArrayList
+    }
+
     fun imageArrayList(): ArrayList<CameraImagesModel> {
         return imageArrayList
     }
