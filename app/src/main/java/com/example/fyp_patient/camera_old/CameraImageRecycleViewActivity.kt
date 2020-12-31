@@ -18,26 +18,27 @@ import android.util.Log
 import android.util.SparseArray
 import android.view.MenuItem
 import android.view.View
+import android.view.WindowManager
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.example.fyp_patient.BarCodeReaderActivity
-import com.example.fyp_patient.BaseActivity
-import com.example.fyp_patient.EncryptAndDecrypt
+import com.example.fyp_patient.*
 import com.example.fyp_patient.OCR.OcrCaptureActivity
-import com.example.fyp_patient.R
 import com.example.fyp_patient.drive.DriveServiceHelper
+import com.example.fyp_patient.signIn.SignInActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.Scope
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.vision.Frame
 import com.google.android.gms.vision.text.TextBlock
@@ -49,7 +50,6 @@ import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
 import id.zelory.compressor.Compressor
 import kotlinx.android.synthetic.main.activity_imagerecycleview.*
-import kotlinx.android.synthetic.main.image_list_item.*
 import kotlinx.android.synthetic.main.toolbar.*
 import kotlinx.android.synthetic.main.toolbar_layout.*
 import java.io.ByteArrayOutputStream
@@ -61,10 +61,12 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickListener{
+class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickListener,
+    NavigationView.OnNavigationItemSelectedListener {
 
     var isInActionMode = false
-//    private val uriArrayList = ArrayList<Uri>()
+
+    //    private val uriArrayList = ArrayList<Uri>()
 //    val arrayList = ArrayList<CameraImagesModel>()
     private var driveServiceHelper: DriveServiceHelper? = null
     private var RC_AUTHORIZE_DRIVE = 101
@@ -73,7 +75,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
     private var image_uri: Uri? = null
     private val IMAGE_CAPTURE_CODE: Int = 103
-    private val IMAGE_SELECT_CODE : Int = 102
+    private val IMAGE_SELECT_CODE: Int = 102
     private var ACCESS_DRIVE_SCOPE = Scope(Scopes.DRIVE_FILE)
     private var SCOPE_EMAIL = Scope(Scopes.EMAIL)
     var SCOPE_APP_DATA = Scope(Scopes.DRIVE_APPFOLDER)
@@ -88,6 +90,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
     var gso: GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestEmail()
         .build()
+    var uploading: AlertDialog? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,6 +102,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         (R.id.toolbar_main)
         setSupportActionBar(toolbar_main)
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
+
 
         val actionBarDrawerToggle = ActionBarDrawerToggle(
             this,
@@ -116,7 +120,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         var email: String? = prefs.getString("email", "no email")
         var url: String? = prefs.getString("url", "no url")
 
-        val navigationView: NavigationView = findViewById<View>(R.id.nav_view) as NavigationView
+        val navigationView: NavigationView = findViewById<NavigationView>(R.id.nav_view)
         val headerView: View = navigationView.getHeaderView(0)
         val navUsername = headerView.findViewById(R.id.doctorName) as TextView
         val navUseremail = headerView.findViewById(R.id.doctorEmail) as TextView
@@ -128,11 +132,13 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
         val intent = intent
         val bundle = intent.extras
-        if (bundle != null){
+        if (bundle != null) {
             val uri = bundle.get("ocrImageURI")
             ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri as Uri))
             updateView()
         }
+
+
 
         updateView()
 //        counter_text.visibility = View.GONE
@@ -158,10 +164,13 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             checkPermissionAndOpenGallery()
         }
 
-        bar.setOnClickListener {
-            val barCodeIntent = Intent(this, BarCodeReaderActivity::class.java)
-            startActivity(barCodeIntent)
-        }
+//        bar.setOnClickListener {
+//            AlertDialogUtility.alertDialog(this, "Uploading....").create()
+//
+////            val barCodeIntent = Intent(this, BarCodeReaderActivity::class.java)
+////            startActivity(barCodeIntent)
+//        }
+        navigationView.setNavigationItemSelectedListener(this)
 
     }
 
@@ -190,6 +199,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             openCamera()
         }
     }
+
     //check the permissions and open the gallery
     private fun checkPermissionAndOpenGallery() {
         //if the system is marshmallow or above get the run time permission
@@ -205,6 +215,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             openGallery()
         }
     }
+
     //open the camera and capture the image
     private fun openCamera() {
         val values = ContentValues()
@@ -219,7 +230,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
     }
 
     //open gallery and select the image
-    private fun openGallery(){
+    private fun openGallery() {
         val intent = Intent()
         intent.type = "image/*"
         intent.action = Intent.ACTION_GET_CONTENT
@@ -271,7 +282,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         }
 
         //call when image is selected from the gallery
-        if (requestCode == IMAGE_SELECT_CODE && resultCode==Activity.RESULT_OK) {
+        if (requestCode == IMAGE_SELECT_CODE && resultCode == Activity.RESULT_OK) {
             val uri = data?.data
             val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
             readText(bitmap)
@@ -314,6 +325,22 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
     //
     fun uploadImageIntoDrive(position: Int) {
+//        val progress = AlertDialogUtility.alertDialog(this, "Uploading....")
+//        progress.create()
+        AlertDialogUtility.alertDialog(this, "Uploading....").show()
+
+
+//        val layoutParams: WindowManager.LayoutParams = window.attributes
+//        layoutParams.dimAmount = 0.75f
+//        window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+//        window.attributes = layoutParams
+//        progress
+//        val builder1: AlertDialog.Builder = AlertDialog.Builder(this)
+//        builder1.setMessage("Write your message here.")
+//        builder1.setCancelable(true)
+//        val alert11 = builder1.create()
+//        alert11.show()
+
         val TAG = "image upload"
         val bitmap = MediaStore.Images.Media.getBitmap(
             this.contentResolver,
@@ -345,12 +372,17 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             val encryptedFile = EncryptAndDecrypt().encryptFile(inputStream)
             mDriveServiceHelper?.uploadFile(compressedImageFile, "application/octet-stream", null)
                 ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
+                    removeItem(position)
+//                    alertDialog.dismiss()
+
+//                    progress.cancel()
                     Log.i(
                         TAG,
                         "Successfully Uploaded. File Id :$googleDriveFileHolder"
                     )
                 })
                 ?.addOnFailureListener { e ->
+//                    progress.dismiss()
                     Log.i(
                         TAG,
                         "Failed to Upload. File Id :" + e.message
@@ -497,7 +529,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         }
     }
 
-    private fun getCurrentDate(): String{
+    private fun getCurrentDate(): String {
         val c = Calendar.getInstance().time
         val df = SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault())
         return df.format(c)
@@ -553,14 +585,14 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
     }
 
 
-     fun tapped(position: Int) {
+    fun tapped(position: Int) {
         val intent = Intent(applicationContext, FullScreenImageActivity::class.java)
         intent.putExtra("position", position)
         startActivity(intent)
 
     }
 
-    fun detectRotation(bitmap: Bitmap, uri: Uri){
+    fun detectRotation(bitmap: Bitmap, uri: Uri) {
 
         val photoPath = getPath(uri)
         val ei = ExifInterface(photoPath)
@@ -600,24 +632,54 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         return true
     }
 
-    fun removeItem(position: Int){
+    fun removeItem(position: Int) {
         ImageHolder.removeImage(position)
         ImageURIHolder.removeUri(position)
         updateView()
     }
 
-//    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-//        when (item.itemId) {
-//            R.id.logout1 -> {
-//                Log.i("mlogout","logout")
-//                Toast.makeText(applicationContext, "Logout Called", Toast.LENGTH_SHORT).show()
-//            }
-//        }
-////        drawerLayout.closeDrawer(GravityCompat.START);
-//        return true;
-//    }
-//    private fun setNavigationViewListener() {
-//        val navigationView = findViewById<View>(R.id.nav_view) as NavigationView
-//        navigationView.setNavigationItemSelectedListener(this)
-//    }
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        when (id) {
+            (R.id.logout1) -> {
+                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .build()
+                GoogleSignIn.getClient(this, gso).signOut()
+                    .addOnCompleteListener(this, OnCompleteListener<Void?> {
+                        val intent = Intent(applicationContext, SignInActivity::class.java)
+                        startActivity(intent)
+                        Toast.makeText(this, "Logout Successfully", Toast.LENGTH_SHORT).show()
+                    }).addOnFailureListener {
+                        Toast.makeText(this, "Issue with Logout", Toast.LENGTH_SHORT).show()
+                    }
+                Toast.makeText(this, "I am clicked", Toast.LENGTH_SHORT).show()
+                drawerLayout.closeDrawer(GravityCompat.START)
+                return true
+            }
+            R.id.camera -> {
+                val intent = Intent(this, OcrCaptureActivity::class.java)
+                startActivity(intent)
+                drawerLayout.closeDrawer(GravityCompat.START)
+                return true
+            }
+            R.id.gallery -> {
+                checkPermissionAndOpenGallery()
+                drawerLayout.closeDrawer(GravityCompat.START)
+                return true
+            }
+            R.id.barcode -> {
+                val intent = Intent(this, BarCodeReaderActivity::class.java)
+                startActivity(intent)
+                drawerLayout.closeDrawer(GravityCompat.START)
+                return true
+            }
+            else -> {
+                drawerLayout.closeDrawer(GravityCompat.START)
+                return true
+            }
+        }
+
+    }
+
 }

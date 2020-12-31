@@ -2,12 +2,13 @@ package com.example.fyp_patient.camera_old
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.fyp_patient.AlertDialogUtility
 import com.example.fyp_patient.R
 import kotlinx.android.synthetic.main.image_list_item.view.*
 
@@ -40,6 +41,12 @@ class CameraImagesAdapter(private val arrayList: ArrayList<CameraImagesModel>, p
             }
 //            (context as CameraImageRecycleViewActivity).prepareSelection(p0, adapterPosition)
             if (p0!!.id == itemView.uploadButton.id){
+                Log.i("checkdelay","called 0")
+//                val context = context as CameraImageRecycleViewActivity
+//                val uploading = AlertDialogUtility.alertDialog(context as CameraImageRecycleViewActivity, "Uploading....", R.raw.progress_animation)
+
+                Log.i("checkdelay","called 1")
+
                 (context as CameraImageRecycleViewActivity).uploadImageIntoDrive(adapterPosition)
             }
 
