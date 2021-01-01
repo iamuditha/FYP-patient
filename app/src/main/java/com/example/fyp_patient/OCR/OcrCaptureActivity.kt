@@ -19,6 +19,7 @@ import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeech.OnInitListener
 import android.util.Log
+import android.util.SparseArray
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
@@ -38,6 +39,7 @@ import com.example.fyp_patient.camera_old.CameraImageRecycleViewActivity
 import com.example.fyp_patient.camera_old.ImageURIHolder
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.vision.Frame
 import com.google.android.gms.vision.text.TextBlock
 import com.google.android.gms.vision.text.TextRecognizer
 import com.google.android.material.snackbar.Snackbar
@@ -105,24 +107,82 @@ class OcrCaptureActivity : AppCompatActivity() {
         captureImage!!.setOnClickListener {
             cameraSource!!.takePicture(null, object : CameraSource.PictureCallback {
                 override fun onPictureTaken(data: ByteArray) {
-                    val bm = BitmapFactory.decodeByteArray(data, 0, data.size)
+                    var bm = BitmapFactory.decodeByteArray(data, 0, data.size)
                     var uri = getImageUri(applicationContext, bm)
-                    Log.i("myuri123", uri.toString())
-//                    val dm = DisplayMetrics()
-//                    windowManager.defaultDisplay.getMetrics(dm)
-//                    imageView!!.minimumHeight = dm.heightPixels
-//                    imageView!!.minimumWidth = dm.widthPixels
-//                    imageView!!.setImageBitmap(bm)
-//                    uri = getTheImageUri(applicationContext,detectRotation(uri))
+                    bm = rotateImage(bm,90)
+
+                    readText(bm)
                     val intent = Intent(
                         applicationContext,
                         CameraImageRecycleViewActivity::class.java
                     )
+
                     intent.putExtra("ocrImageURI", uri)
                     ImageURIHolder.addUri(uri)
                     startActivity(intent)
                 }
             })
+        }
+    }
+    private fun rotateImage(source: Bitmap, angle: Int): Bitmap? {
+        val matrix = Matrix()
+        matrix.postRotate(angle.toFloat())
+        return Bitmap.createBitmap(
+            source, 0, 0, source.width, source.height,
+            matrix, true
+        )
+    }
+
+    fun detectRotation(bitmap: Bitmap, photoPath: String): Bitmap? {
+        val ei: ExifInterface = ExifInterface(photoPath)
+        val orientation = ei.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_UNDEFINED
+        )
+
+        Log.i("detectedText", orientation.toString())
+
+        var rotatedBitmap: Bitmap? = null
+        when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotatedBitmap = rotateImage(bitmap, 90)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotatedBitmap = rotateImage(bitmap, 180)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotatedBitmap = rotateImage(bitmap, 270)
+            ExifInterface.ORIENTATION_NORMAL -> rotatedBitmap = bitmap
+            else -> rotatedBitmap = bitmap
+        }
+        return rotatedBitmap
+    }
+
+    fun readText(imageBitmap: Bitmap) {
+
+        val LOG_TAG = "detectedText"
+        // imageBitmap is the Bitmap image you're trying to process for text
+        if (imageBitmap != null) {
+            val textRecognizer: TextRecognizer = TextRecognizer.Builder(applicationContext).build()
+            if (!textRecognizer.isOperational) {
+                Log.v(LOG_TAG, "Detector dependencies are not yet available.")
+
+                // Check for low storage.  If there is low storage, the native library will not be
+                // downloaded, so detection will not become operational.
+                val lowstorageFilter = IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW)
+                val hasLowStorage = registerReceiver(null, lowstorageFilter) != null
+                if (hasLowStorage) {
+                    Toast.makeText(this, "Low Storage", Toast.LENGTH_LONG).show()
+                    Log.w(LOG_TAG, "Low Storage")
+                }
+            }
+            val imageFrame = Frame.Builder()
+                .setBitmap(imageBitmap)
+                .build()
+
+            val textBlocks: SparseArray<TextBlock> = textRecognizer.detect(imageFrame)
+            for (i in 0 until textBlocks.size()) {
+                val item: TextBlock = textBlocks.valueAt(i)
+                if (item.value != null) {
+                    Log.d(LOG_TAG, "Text detected! " + item.value)
+
+                }
+            }
         }
     }
 
@@ -435,32 +495,32 @@ class OcrCaptureActivity : AppCompatActivity() {
         return cursor.getString(column_index)
     }
 
-    private fun detectRotation(uri: Uri) {
-        val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
-        val photoPath = getPath(uri)
-        val ei = ExifInterface(photoPath)
-        val orientation: Int = ei.getAttributeInt(
-            ExifInterface.TAG_ORIENTATION,
-            ExifInterface.ORIENTATION_UNDEFINED
-        )
+//    private fun detectRotation(uri: Uri) {
+//        val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+//        val photoPath = getPath(uri)
+//        val ei = ExifInterface(photoPath)
+//        val orientation: Int = ei.getAttributeInt(
+//            ExifInterface.TAG_ORIENTATION,
+//            ExifInterface.ORIENTATION_UNDEFINED
+//        )
+//
+//        var rotatedBitmap: Bitmap? = null
+//        when (orientation) {
+//            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90)
+//            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180)
+//            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270)
+//            ExifInterface.ORIENTATION_NORMAL -> bitmap
+//        }
+//    }
 
-        var rotatedBitmap: Bitmap? = null
-        when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90)
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180)
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270)
-            ExifInterface.ORIENTATION_NORMAL -> bitmap
-        }
-    }
-
-    private fun rotateImage(source: Bitmap, angle: Int): Bitmap? {
-        val matrix = Matrix()
-        matrix.postRotate(angle.toFloat())
-        return Bitmap.createBitmap(
-            source, 0, 0, source.width, source.height,
-            matrix, true
-        )
-    }
+//    private fun rotateImage(source: Bitmap, angle: Int): Bitmap? {
+//        val matrix = Matrix()
+//        matrix.postRotate(angle.toFloat())
+//        return Bitmap.createBitmap(
+//            source, 0, 0, source.width, source.height,
+//            matrix, true
+//        )
+//    }
 
     fun getTheImageUri(context: Context, inImage: Bitmap): Uri? {
         val bytes = ByteArrayOutputStream()

@@ -157,29 +157,18 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             val ocrIntent = Intent(this, OcrCaptureActivity::class.java)
             startActivity(ocrIntent)
         }
-//        openCamera.setOnClickListener {
-//            checkPermissionAndOpenCamera()
-//        }
+
         openGallery.setOnClickListener {
             checkPermissionAndOpenGallery()
         }
 
-//        bar.setOnClickListener {
-//            AlertDialogUtility.alertDialog(this, "Uploading....").create()
-//
-////            val barCodeIntent = Intent(this, BarCodeReaderActivity::class.java)
-////            startActivity(barCodeIntent)
-//        }
         navigationView.setNavigationItemSelectedListener(this)
 
+        val checkTestList = dataRepos.testNamesList()
+        if (checkTestList.contains("cTnI")){
+            Log.i("myocrtest", "found an item")
+        }
     }
-
-//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-//        val inflater: MenuInflater = menuInflater
-//        inflater.inflate(R.menu.main, menu)
-//        return true
-//    }
-
 
     //check the permissions and open the camera
     private fun checkPermissionAndOpenCamera() {
@@ -325,21 +314,10 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
     //
     fun uploadImageIntoDrive(position: Int) {
-//        val progress = AlertDialogUtility.alertDialog(this, "Uploading....")
-//        progress.create()
-        AlertDialogUtility.alertDialog(this, "Uploading....").show()
-
-
-//        val layoutParams: WindowManager.LayoutParams = window.attributes
-//        layoutParams.dimAmount = 0.75f
-//        window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-//        window.attributes = layoutParams
-//        progress
-//        val builder1: AlertDialog.Builder = AlertDialog.Builder(this)
-//        builder1.setMessage("Write your message here.")
-//        builder1.setCancelable(true)
-//        val alert11 = builder1.create()
-//        alert11.show()
+        val progressDialog = ProgressDialog(this@CameraImageRecycleViewActivity)
+        progressDialog.setTitle("Uploading to google Drive")
+        progressDialog.setMessage("Please wait........")
+        progressDialog.show()
 
         val TAG = "image upload"
         val bitmap = MediaStore.Images.Media.getBitmap(
@@ -535,15 +513,13 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         return df.format(c)
     }
 
-    private fun readText(imageBitmap: Bitmap) {
+     fun readText(imageBitmap: Bitmap) {
 
         val LOG_TAG = "detectedText"
         // imageBitmap is the Bitmap image you're trying to process for text
-
-        // imageBitmap is the Bitmap image you're trying to process for text
         if (imageBitmap != null) {
-            val textRecognizer: TextRecognizer = TextRecognizer.Builder(this).build()
-            if (!textRecognizer.isOperational()) {
+            val textRecognizer: TextRecognizer = TextRecognizer.Builder(applicationContext).build()
+            if (!textRecognizer.isOperational) {
                 Log.w(LOG_TAG, "Detector dependencies are not yet available.")
 
                 // Check for low storage.  If there is low storage, the native library will not be

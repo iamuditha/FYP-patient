@@ -26,6 +26,7 @@ import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import javaethereum.contracts.generated.MainContract
 import kotlinx.android.synthetic.main.activity_bar_code_reader.*
+import kotlinx.android.synthetic.main.toolbar.*
 import org.json.JSONException
 import org.json.JSONObject
 import org.web3j.protocol.Web3j
@@ -35,7 +36,7 @@ import java.util.*
 import kotlin.math.floor
 
 
-class BarCodeReaderActivity : AppCompatActivity() {
+class BarCodeReaderActivity : BaseActivity() {
 
     private var isFirstTime = true
 
@@ -48,17 +49,45 @@ class BarCodeReaderActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bar_code_reader)
 
-        if (ContextCompat.checkSelfPermission(
-                this@BarCodeReaderActivity,
-                android.Manifest.permission.CAMERA
-            ) != PackageManager.PERMISSION_GRANTED
-        ){
-            askForCameraPermission()
-        }else {
+        setSupportActionBar(toolbar_main)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setHomeButtonEnabled(true)
+
+        checkPermissionAndOpenCamera()
+
+
+//        if (ContextCompat.checkSelfPermission(
+//                this@BarCodeReaderActivity,
+//                android.Manifest.permission.CAMERA
+//            ) != PackageManager.PERMISSION_GRANTED
+//        ){
+//            askForCameraPermission()
+//        }else {
+//            checkPermissionAndOpenCamera()
+//        }
+//
+//        AlertDialogUtility.alertDialog(this, "Uploading....").show()
+
+
+
+    }
+
+    private fun checkPermissionAndOpenCamera() {
+        //if the system is marshmallow or above get the run time permission
+        if (checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED ||
+            checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED
+        ) {
+            //permission was not enabled
+            val permission = arrayOf(
+                android.Manifest.permission.CAMERA,
+                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            //show popup to request permission
+            requestPermissions(permission, 191)
+        } else {
+            //permission already granted
             setupControls()
         }
-
-
     }
 
     private fun setupControls() {
@@ -70,13 +99,15 @@ class BarCodeReaderActivity : AppCompatActivity() {
         detector.setProcessor(processor)
     }
 
-    private fun askForCameraPermission() {
-        ActivityCompat.requestPermissions(
-            this@BarCodeReaderActivity,
-            arrayOf(android.Manifest.permission.CAMERA),
-            requestCodeCameraPermission
-        )
-    }
+//    private fun askForCameraPermission() {
+//        ActivityCompat.requestPermissions(
+//            this@BarCodeReaderActivity,
+//            arrayOf(android.Manifest.permission.CAMERA),
+//            requestCodeCameraPermission
+//        )
+//        setupControls()
+//
+//    }
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -87,6 +118,8 @@ class BarCodeReaderActivity : AppCompatActivity() {
         if (requestCode == requestCodeCameraPermission && grantResults.isNotEmpty()){
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 setupControls()
+                Toast.makeText(applicationContext, "Permission Granted", Toast.LENGTH_SHORT).show()
+
             }else {
                 Toast.makeText(applicationContext, "Permission Denied", Toast.LENGTH_SHORT).show()
             }
@@ -107,7 +140,7 @@ class BarCodeReaderActivity : AppCompatActivity() {
                         Manifest.permission.CAMERA
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
-                    askForCameraPermission()
+                    checkPermissionAndOpenCamera()
                     return
                 }
                 cameraSource.start(surfaceHolder)
