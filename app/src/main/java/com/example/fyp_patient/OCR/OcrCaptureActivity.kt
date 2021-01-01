@@ -109,9 +109,11 @@ class OcrCaptureActivity : AppCompatActivity() {
                 override fun onPictureTaken(data: ByteArray) {
                     var bm = BitmapFactory.decodeByteArray(data, 0, data.size)
                     var uri = getImageUri(applicationContext, bm)
-                    bm = rotateImage(bm,90)
-
-                    readText(bm)
+                    bm = rotateImage(bm, 90)
+                    val myWords = readText(bm)
+                    for (i in myWords){
+                        Log.i("detectedText",i)
+                    }
                     val intent = Intent(
                         applicationContext,
                         CameraImageRecycleViewActivity::class.java
@@ -153,9 +155,10 @@ class OcrCaptureActivity : AppCompatActivity() {
         return rotatedBitmap
     }
 
-    fun readText(imageBitmap: Bitmap) {
+    fun readText(imageBitmap: Bitmap): ArrayList<String> {
 
         val LOG_TAG = "detectedText"
+        val wordArrayList = ArrayList<String>()
         // imageBitmap is the Bitmap image you're trying to process for text
         if (imageBitmap != null) {
             val textRecognizer: TextRecognizer = TextRecognizer.Builder(applicationContext).build()
@@ -180,10 +183,16 @@ class OcrCaptureActivity : AppCompatActivity() {
                 val item: TextBlock = textBlocks.valueAt(i)
                 if (item.value != null) {
                     Log.d(LOG_TAG, "Text detected! " + item.value)
+                    Log.d(LOG_TAG, "Text detected! " + item.value.length)
+                    for (word in item.value.split(" ".toRegex()).toTypedArray()) {
+                        wordArrayList.add(word)
+                    }
+
 
                 }
             }
         }
+        return wordArrayList
     }
 
     fun getImageUri(inContext: Context, inImage: Bitmap): Uri {

@@ -7,4 +7,5 @@
     <color name="lightGrayColor">#a9a9a9</color>
 
     <color name="black_overlay">#66000000</color>
+    <color name="gradient_end_color">#18a3fe</color>
 </resources>

@@ -92,6 +92,8 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         .build()
     var uploading: AlertDialog? = null
 
+    var progressDialog: ProgressDialog? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -138,10 +140,12 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             updateView()
         }
 
-
+        progressDialog = ProgressDialog(this)
+        progressDialog!!.setTitle("Uploading to google Drive")
+        progressDialog!!.setMessage("Please wait........")
+        progressDialog!!.create()
 
         updateView()
-//        counter_text.visibility = View.GONE
 
         val gso =
             GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -273,6 +277,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         //call when image is selected from the gallery
         if (requestCode == IMAGE_SELECT_CODE && resultCode == Activity.RESULT_OK) {
             val uri = data?.data
+            ImageURIHolder.addUri(uri!!)
             val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
             readText(bitmap)
             Log.i("gallery123", data?.clipData?.getItemAt(0)?.uri.toString())
@@ -314,10 +319,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
     //
     fun uploadImageIntoDrive(position: Int) {
-        val progressDialog = ProgressDialog(this@CameraImageRecycleViewActivity)
-        progressDialog.setTitle("Uploading to google Drive")
-        progressDialog.setMessage("Please wait........")
-        progressDialog.show()
+        progressDialog!!.show()
 
         val TAG = "image upload"
         val bitmap = MediaStore.Images.Media.getBitmap(
@@ -351,16 +353,14 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             mDriveServiceHelper?.uploadFile(compressedImageFile, "application/octet-stream", null)
                 ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
                     removeItem(position)
-//                    alertDialog.dismiss()
-
-//                    progress.cancel()
+                    progressDialog!!.dismiss()
                     Log.i(
                         TAG,
                         "Successfully Uploaded. File Id :$googleDriveFileHolder"
                     )
                 })
                 ?.addOnFailureListener { e ->
-//                    progress.dismiss()
+                    progressDialog!!.dismiss()
                     Log.i(
                         TAG,
                         "Failed to Upload. File Id :" + e.message
