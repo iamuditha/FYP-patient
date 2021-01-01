@@ -6,6 +6,8 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.example.fyp_patient.R
 import com.example.fyp_patient.camera_old.CameraImageRecycleViewActivity
+import com.example.fyp_patient.camera_old.ImageHolder
+import com.example.fyp_patient.camera_old.ImageURIHolder
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -44,13 +46,20 @@ class SignInActivity : AppCompatActivity() {
         val account = GoogleSignIn.getLastSignedInAccount(this)
         account?.let { getProfileData(it) }
         if (account != null) {
+            clearOldData()
             val intent = Intent(this, CameraImageRecycleViewActivity::class.java)
             startActivity(intent)
         }
     }
 
+    fun clearOldData(){
+        ImageHolder.imageArrayList().clear()
+        ImageURIHolder.uriArrayList().clear()
+    }
+
     private fun signIn() {
         val signInIntent = mGoogleSignInClient!!.signInIntent
+        clearOldData()
         startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 

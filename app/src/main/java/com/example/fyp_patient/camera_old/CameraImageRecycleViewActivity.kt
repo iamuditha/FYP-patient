@@ -291,6 +291,13 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
     private fun updateView() {
         recycleView.layoutManager = LinearLayoutManager(this)
         recycleView.adapter = adapter
+        if(ImageHolder.imageArrayList().size != 0){
+            imageDisplayWhenEmpty.visibility = View.GONE
+            emptyTextView.visibility = View.GONE
+        }else{
+            imageDisplayWhenEmpty.visibility = View.VISIBLE
+            emptyTextView.visibility = View.VISIBLE
+        }
     }
 
     //
