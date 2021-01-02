@@ -172,6 +172,8 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         if (checkTestList.contains("cTnI")){
             Log.i("myocrtest", "found an item")
         }
+
+        listFilesInDrive()
     }
 
     //check the permissions and open the camera
@@ -226,6 +228,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
     private fun openGallery() {
         val intent = Intent()
         intent.type = "image/*"
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true)
         intent.action = Intent.ACTION_GET_CONTENT
         startActivityForResult(Intent.createChooser(intent, "Pictures: "), IMAGE_SELECT_CODE)
     }
@@ -276,12 +279,25 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
         //call when image is selected from the gallery
         if (requestCode == IMAGE_SELECT_CODE && resultCode == Activity.RESULT_OK) {
+        if (data!!.clipData != null){
+            val count = data.clipData!!.itemCount
+            var i = 0;
+            while (i < count) {
+                val uri = data.clipData!!.getItemAt(i).uri
+                ImageURIHolder.addUri(uri!!)
+                val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+                readText(bitmap)
+                ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri))
+                i++
+            }
+        }else if (data.data != null){
             val uri = data?.data
             ImageURIHolder.addUri(uri!!)
             val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
             readText(bitmap)
-            Log.i("gallery123", data?.clipData?.getItemAt(0)?.uri.toString())
-            ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri!!))
+            ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri))
+        }
+
             updateView()
 
         }
@@ -300,28 +316,39 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         }
     }
 
-    //
-    private fun uploadPdfFile() {
-        val progressDialog = ProgressDialog(this@CameraImageRecycleViewActivity)
-        progressDialog.setTitle("Uploading to google Drive")
-        progressDialog.setMessage("Please wait........")
-        progressDialog.show()
-//        val filePath = "/storage/emulated/0/Test.jpg"
-        Log.i("mypath", getPath(ImageHolder.imageArrayList()[0].uri))
-        driveServiceHelper!!.createFilePdf(getPath(ImageHolder.imageArrayList()[0].uri).toString())
-            ?.addOnSuccessListener {
-                progressDialog.dismiss()
-                Toast.makeText(applicationContext, "Uploaded Successfully", Toast.LENGTH_SHORT)
-                    .show()
+    //list the files in the drive
+    private fun listFilesInDrive() {
+
+        val thread = Thread(Runnable {
+            try {
+                if (mDriveServiceHelper == null) {
+                    Log.i("logininfo", "this is null")
+                    checkForGooglePermissions()
+                }
+                val thread1 = Thread{
+                    var fileList123456 = mDriveServiceHelper?.listDriveImageFiles()
+                    if (fileList123456 != null) {
+                        var j = 0
+                        for (i in fileList123456){
+                            Log.i("logininfo", j.toString() + i.toString())
+                            j++
+                        }
+                    }
+                }
+                thread1.start()
+                thread1.join()
+//                Log.i("logininfo", fileList[0].toString())
+//                Log.i("logininfo", fileList[1].toString())
+
+
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
-            ?.addOnFailureListener {
-                progressDialog.dismiss()
-                Toast.makeText(
-                    applicationContext,
-                    "Check your google Drive api key",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
+        })
+        thread.start()
+
+
+
     }
 
     //
