@@ -32,6 +32,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.example.fyp_patient.*
 import com.example.fyp_patient.OCR.OcrCaptureActivity
+import com.example.fyp_patient.drive.DriveFileList
 import com.example.fyp_patient.drive.DriveServiceHelper
 import com.example.fyp_patient.signIn.SignInActivity
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -140,11 +141,6 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             updateView()
         }
 
-        progressDialog = ProgressDialog(this)
-        progressDialog!!.setTitle("Uploading to google Drive")
-        progressDialog!!.setMessage("Please wait........")
-        progressDialog!!.create()
-
         updateView()
 
         val gso =
@@ -174,6 +170,21 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         }
 
         listFilesInDrive()
+//        mDriveServiceHelper?.createFolder("MEDICO", null)
+//            ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
+//                progressDialog!!.dismiss()
+//                Log.i(
+//                    "creatingfol",
+//                    "Successfully Uploaded. File Id :$googleDriveFileHolder"
+//                )
+//            })
+//            ?.addOnFailureListener { e ->
+//                progressDialog!!.dismiss()
+//                Log.i(
+//                    "creatingfol",
+//                    "Failed to Upload. File Id :" + e.message
+//                )
+//            }
     }
 
     //check the permissions and open the camera
@@ -322,23 +333,24 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         val thread = Thread(Runnable {
             try {
                 if (mDriveServiceHelper == null) {
-                    Log.i("logininfo", "this is null")
                     checkForGooglePermissions()
                 }
                 val thread1 = Thread{
-                    var fileList123456 = mDriveServiceHelper?.listDriveImageFiles()
+                    val fileList123456 = mDriveServiceHelper?.listDriveImageFiles()
                     if (fileList123456 != null) {
-                        var j = 0
                         for (i in fileList123456){
-                            Log.i("logininfo", j.toString() + i.toString())
-                            j++
+                            DriveFileList.addFile(i)
                         }
                     }
                 }
                 thread1.start()
                 thread1.join()
-//                Log.i("logininfo", fileList[0].toString())
-//                Log.i("logininfo", fileList[1].toString())
+
+                for (i in DriveFileList.driveFileList()){
+                    Log.i("myfilelist", i.toString())
+                }
+                val check = DriveFileList.isFileAvailable("MyPDFFile")
+                Log.i("myfilelist", check.toString())
 
 
             } catch (e: Exception) {
@@ -353,7 +365,14 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
     //
     fun uploadImageIntoDrive(position: Int) {
-        progressDialog!!.show()
+        val thread1 = Thread {
+            runOnUiThread {
+                uploading_animation_cover.visibility = View.VISIBLE
+                uploading_animation.visibility = View.VISIBLE
+            }
+        }
+        thread1.start()
+        thread1.join()
 
         val TAG = "image upload"
         val bitmap = MediaStore.Images.Media.getBitmap(
@@ -384,17 +403,19 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             val compressedImageFile = Compressor(this).compressToFile(file);
             val inputStream = FileInputStream(compressedImageFile)
             val encryptedFile = EncryptAndDecrypt().encryptFile(inputStream)
-            mDriveServiceHelper?.uploadFile(compressedImageFile, "application/octet-stream", null)
+            mDriveServiceHelper?.uploadFile(compressedImageFile, "application/octet-stream", "1l_mz2QPAAO-GkrgRaEfnO454qjOFIhiN")
                 ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
                     removeItem(position)
-                    progressDialog!!.dismiss()
+                    uploading_animation_cover.visibility = View.GONE
+                    uploading_animation.visibility = View.GONE
                     Log.i(
                         TAG,
                         "Successfully Uploaded. File Id :$googleDriveFileHolder"
                     )
                 })
                 ?.addOnFailureListener { e ->
-                    progressDialog!!.dismiss()
+                    uploading_animation_cover.visibility = View.GONE
+                    uploading_animation.visibility = View.GONE
                     Log.i(
                         TAG,
                         "Failed to Upload. File Id :" + e.message

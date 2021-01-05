@@ -54,7 +54,7 @@ class DriveServiceHelper(private val mDriveService: Drive) {
             Callable<GoogleDriveFileHolder> {
                 val googleDriveFileHolder = GoogleDriveFileHolder()
                 val root: List<String>
-                root = folderId?.let { listOf(it) } ?: listOf("medico")
+                root = folderId?.let { listOf(it) } ?: listOf()
                 val metadata =
                     File()
                         .setParents(root)
