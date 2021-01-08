@@ -37,6 +37,7 @@ import com.example.fyp_patient.camera.CameraSourcePreview
 import com.example.fyp_patient.camera.GraphicOverlay
 import com.example.fyp_patient.camera_old.CameraImageRecycleViewActivity
 import com.example.fyp_patient.camera_old.ImageURIHolder
+import com.example.fyp_patient.testData
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.vision.Frame
@@ -157,13 +158,52 @@ class OcrCaptureActivity : AppCompatActivity() {
 
     fun readText(imageBitmap: Bitmap): ArrayList<String> {
 
+//        val LOG_TAG = "detectedText"
+//        val wordArrayList = ArrayList<String>()
+//        // imageBitmap is the Bitmap image you're trying to process for text
+//        if (imageBitmap != null) {
+//            val textRecognizer: TextRecognizer = TextRecognizer.Builder(applicationContext).build()
+//            if (!textRecognizer.isOperational) {
+//                Log.v(LOG_TAG, "Detector dependencies are not yet available.")
+//
+//                // Check for low storage.  If there is low storage, the native library will not be
+//                // downloaded, so detection will not become operational.
+//                val lowstorageFilter = IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW)
+//                val hasLowStorage = registerReceiver(null, lowstorageFilter) != null
+//                if (hasLowStorage) {
+//                    Toast.makeText(this, "Low Storage", Toast.LENGTH_LONG).show()
+//                    Log.w(LOG_TAG, "Low Storage")
+//                }
+//            }
+//            val imageFrame = Frame.Builder()
+//                .setBitmap(imageBitmap)
+//                .build()
+//
+//            val textBlocks: SparseArray<TextBlock> = textRecognizer.detect(imageFrame)
+//            for (i in 0 until textBlocks.size()) {
+//                val item: TextBlock = textBlocks.valueAt(i)
+//                if (item.value != null) {
+//                    Log.d(LOG_TAG, "Text detected! " + item.value)
+//                    Log.d(LOG_TAG, "Text detected! " + item.value.length)
+//                    for (word in item.value.split(" ".toRegex()).toTypedArray()) {
+//                        wordArrayList.add(word)
+//                    }
+//
+//
+//                }
+//            }
+//        }
+        val singleWordArrayList = java.util.ArrayList<String>()
+        val doubleWordArrayList = java.util.ArrayList<String>()
+        val tripleWordArrayList = java.util.ArrayList<String>()
+
+
         val LOG_TAG = "detectedText"
-        val wordArrayList = ArrayList<String>()
         // imageBitmap is the Bitmap image you're trying to process for text
         if (imageBitmap != null) {
             val textRecognizer: TextRecognizer = TextRecognizer.Builder(applicationContext).build()
             if (!textRecognizer.isOperational) {
-                Log.v(LOG_TAG, "Detector dependencies are not yet available.")
+                Log.w(LOG_TAG, "Detector dependencies are not yet available.")
 
                 // Check for low storage.  If there is low storage, the native library will not be
                 // downloaded, so detection will not become operational.
@@ -182,17 +222,29 @@ class OcrCaptureActivity : AppCompatActivity() {
             for (i in 0 until textBlocks.size()) {
                 val item: TextBlock = textBlocks.valueAt(i)
                 if (item.value != null) {
-                    Log.d(LOG_TAG, "Text detected! " + item.value)
-                    Log.d(LOG_TAG, "Text detected! " + item.value.length)
-                    for (word in item.value.split(" ".toRegex()).toTypedArray()) {
-                        wordArrayList.add(word)
+                    if (item.value != null) {
+//                        Log.d(LOG_TAG, "Text detected! " + item.value)
+//                        Log.d(LOG_TAG, "Text detected! " + item.value.length)
+                        for (word in item.value.split(" ".toRegex()).toTypedArray()) {
+                            Log.d(LOG_TAG, "Text detected! $word")
+
+                            singleWordArrayList.add(word)
+                        }
+
+                        for (j in 0 until singleWordArrayList.size-2){
+                            doubleWordArrayList.add(singleWordArrayList[j] + " " + singleWordArrayList[j+1])
+                            tripleWordArrayList.add(singleWordArrayList[j] + " " + singleWordArrayList[j+1] + " " +singleWordArrayList[j+2])
+                        }
+//                        doubleWordArrayList.add(singleWordArrayList[singleWordArrayList.size-2]+ " " + singleWordArrayList[singleWordArrayList.size-1])
                     }
-
-
                 }
+
             }
+
         }
-        return wordArrayList
+        val match = findMatchingWords(singleWordArrayList,doubleWordArrayList,tripleWordArrayList)
+        Log.i("matchingword",match)
+        return singleWordArrayList
     }
 
     fun getImageUri(inContext: Context, inImage: Bitmap): Uri {
@@ -538,4 +590,95 @@ class OcrCaptureActivity : AppCompatActivity() {
             MediaStore.Images.Media.insertImage(context.contentResolver, inImage, "Title", null)
         return Uri.parse(path)
     }
+
+
+    fun findMatchingWords(singleList: java.util.ArrayList<String>,doubleList: java.util.ArrayList<String>,tripleList: java.util.ArrayList<String>):String?{
+        for (word in tripleList){
+            if (testData.threeWord.containsKey(word)){
+//                Log.i("tagname",word)
+                return word
+            }
+        }
+        for (word in doubleList){
+            if (testData.twoWords.containsKey(word)){
+                return word
+            }
+        }
+        for (word in singleList){
+            if (testData.oneWord.containsKey(word)){
+                return word
+            }
+        }
+
+        for (word in tripleList){
+            for (key in testData.threeWord.keys){
+                if(key.length <= word.length+2 && key.length  >= word.length-2){
+                    val hLength = upgradedHammingDist(word,word.length,key,key.length)
+                    if (hLength <= 2){
+                        return key
+                    }
+                }
+            }
+        }
+        for (word in doubleList){
+            for (key in testData.twoWords.keys){
+                if(key.length <= word.length+2 && key.length  >= word.length-2){
+                    val hLength = upgradedHammingDist(word,word.length,key,key.length)
+                    if (hLength <= 2){
+                        return key
+                    }
+                }
+            }
+        }
+        for (word in singleList){
+            for (key in testData.oneWord.keys){
+                if(key.length <= word.length+2 && key.length  >= word.length-2){
+                    val hLength = upgradedHammingDist(word,word.length,key,key.length)
+                    if (hLength <= 2){
+                        return key
+                    }
+                }
+            }
+        }
+
+        return null
+    }
+    fun upgradedHammingDist(str1: String, str1_length: Int, str2: String, str2_length: Int): Int {
+        var i = 0
+        var j = 0
+        var count = 0
+        var direction = 1
+        var backwardIndex1 = str1_length - 1
+        var backwardIndex2 = str2_length - 1
+        var forwardIndex1 = 0
+        var forwardIndex2 = 0
+        while (i < str1_length && j < str2_length) {
+            if (direction == 1) {
+                direction = if (str1[forwardIndex1] != str2[forwardIndex2]) {
+                    count++
+                    -1
+                } else {
+                    1
+                }
+                forwardIndex1 += 1
+                forwardIndex2 += 1
+            } else {
+                direction = if (str1[backwardIndex1] != str2[backwardIndex2]) {
+                    count++
+                    1
+                } else {
+                    -1
+                }
+                backwardIndex1 -= 1
+                backwardIndex2 -= 1
+            }
+            i++
+            j++
+        }
+        return count + Math.abs((str1_length - str2_length) / 2)
+    }
+
+
+
+
 }

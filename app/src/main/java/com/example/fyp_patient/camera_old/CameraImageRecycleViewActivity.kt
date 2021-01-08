@@ -18,7 +18,6 @@ import android.util.Log
 import android.util.SparseArray
 import android.view.MenuItem
 import android.view.View
-import android.view.WindowManager
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
@@ -106,7 +105,10 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         setSupportActionBar(toolbar_main)
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
 
+//    checklist()
+        val checklength=upgradedHammingDist("iver Profile","iver Profile".length,"Lipid Profile","Lipid Profile".length)
 
+        Log.i("distance", checklength.toString())
         val actionBarDrawerToggle = ActionBarDrawerToggle(
             this,
             drawerLayout,
@@ -118,19 +120,19 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         actionBarDrawerToggle.syncState()
         supportActionBar?.setHomeButtonEnabled(true)
 
-        var prefs: SharedPreferences = getSharedPreferences("PROFILE_DATA", MODE_PRIVATE)
-        var name: String? = prefs.getString("name", "No name defined")
-        var email: String? = prefs.getString("email", "no email")
-        var url: String? = prefs.getString("url", "no url")
+        val prefs: SharedPreferences = getSharedPreferences("PROFILE_DATA", MODE_PRIVATE)
+        val name: String? = prefs.getString("name", "No name defined")
+        val email: String? = prefs.getString("email", "no email")
+        val url: String? = prefs.getString("url", "no url")
 
         val navigationView: NavigationView = findViewById<NavigationView>(R.id.nav_view)
         val headerView: View = navigationView.getHeaderView(0)
         val navUsername = headerView.findViewById(R.id.doctorName) as TextView
-        val navUseremail = headerView.findViewById(R.id.doctorEmail) as TextView
+        val navUserEmail = headerView.findViewById(R.id.doctorEmail) as TextView
         val navUserImage = headerView.findViewById(R.id.doctorImage) as ImageView
 
         navUsername.text = name
-        navUseremail.text = email
+        navUserEmail.text = email
         Glide.with(this).load(url).apply(RequestOptions.circleCropTransform()).into(navUserImage)
 
         val intent = intent
@@ -170,6 +172,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         }
 
         listFilesInDrive()
+
 //        mDriveServiceHelper?.createFolder("MEDICO", null)
 //            ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
 //                progressDialog!!.dismiss()
@@ -239,7 +242,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
     private fun openGallery() {
         val intent = Intent()
         intent.type = "image/*"
-        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE,true)
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
         intent.action = Intent.ACTION_GET_CONTENT
         startActivityForResult(Intent.createChooser(intent, "Pictures: "), IMAGE_SELECT_CODE)
     }
@@ -335,10 +338,10 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
                 if (mDriveServiceHelper == null) {
                     checkForGooglePermissions()
                 }
-                val thread1 = Thread{
+                val thread1 = Thread {
                     val fileList123456 = mDriveServiceHelper?.listDriveImageFiles()
                     if (fileList123456 != null) {
-                        for (i in fileList123456){
+                        for (i in fileList123456) {
                             DriveFileList.addFile(i)
                         }
                     }
@@ -346,7 +349,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
                 thread1.start()
                 thread1.join()
 
-                for (i in DriveFileList.driveFileList()){
+                for (i in DriveFileList.driveFileList()) {
                     Log.i("myfilelist", i.toString())
                 }
                 val check = DriveFileList.isFileAvailable("MyPDFFile")
@@ -403,7 +406,11 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             val compressedImageFile = Compressor(this).compressToFile(file);
             val inputStream = FileInputStream(compressedImageFile)
             val encryptedFile = EncryptAndDecrypt().encryptFile(inputStream)
-            mDriveServiceHelper?.uploadFile(compressedImageFile, "application/octet-stream", "1l_mz2QPAAO-GkrgRaEfnO454qjOFIhiN")
+            mDriveServiceHelper?.uploadFile(
+                compressedImageFile,
+                "application/octet-stream",
+                "1l_mz2QPAAO-GkrgRaEfnO454qjOFIhiN"
+            )
                 ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
                     removeItem(position)
                     uploading_animation_cover.visibility = View.GONE
@@ -569,8 +576,12 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
     }
 
      fun readText(imageBitmap: Bitmap) {
+         val singleWordArrayList = java.util.ArrayList<String>()
+         val doubleWordArrayList = java.util.ArrayList<String>()
+         val tripleWordArrayList = java.util.ArrayList<String>()
 
-        val LOG_TAG = "detectedText"
+
+         val LOG_TAG = "detectedText"
         // imageBitmap is the Bitmap image you're trying to process for text
         if (imageBitmap != null) {
             val textRecognizer: TextRecognizer = TextRecognizer.Builder(applicationContext).build()
@@ -594,12 +605,109 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             for (i in 0 until textBlocks.size()) {
                 val item: TextBlock = textBlocks.valueAt(i)
                 if (item.value != null) {
-                    Log.d(LOG_TAG, "Text detected! " + item.value)
+                    if (item.value != null) {
+//                        Log.d(LOG_TAG, "Text detected! " + item.value)
+//                        Log.d(LOG_TAG, "Text detected! " + item.value.length)
+                        for (word in item.value.split(" ".toRegex()).toTypedArray()) {
+                            Log.d(LOG_TAG, "Text detected! $word")
 
+                            singleWordArrayList.add(word)
+                        }
+
+                        for (j in 0 until singleWordArrayList.size-2){
+                            doubleWordArrayList.add(singleWordArrayList[j] + " " + singleWordArrayList[j+1])
+                            tripleWordArrayList.add(singleWordArrayList[j] + " " + singleWordArrayList[j+1] + " " +singleWordArrayList[j+2])
+                        }
+//                        doubleWordArrayList.add(singleWordArrayList[singleWordArrayList.size-2]+ " " + singleWordArrayList[singleWordArrayList.size-1])
+                    }
+                }
+
+            }
+
+        }
+         val match = findMatchingWords(singleWordArrayList,doubleWordArrayList,tripleWordArrayList)
+         Log.i("matchingword",match)
+    }
+
+    fun findMatchingWords(singleList: java.util.ArrayList<String>,doubleList: java.util.ArrayList<String>,tripleList: java.util.ArrayList<String>):String?{
+        for (word in tripleList){
+            if (testData.threeWord.containsKey(word)){
+//                Log.i("tagname",word)
+                return word
+            }
+        }
+        for (word in doubleList){
+            if (testData.twoWords.containsKey(word)){
+                return word
+            }
+        }
+        for (word in singleList){
+            if (testData.oneWord.containsKey(word)){
+                return word
+            }
+        }
+
+        for (word in tripleList){
+          for (key in testData.threeWord.keys){
+              if(key.length <= word.length+2 && key.length  >= word.length-2){
+                  val hLength = upgradedHammingDist(word,word.length,key,key.length)
+                  if (hLength <= 2){
+                      return key
+                  }
+              }
+          }
+        }
+        for (word in doubleList){
+            for (key in testData.twoWords.keys){
+                if(key.length <= word.length+2 && key.length  >= word.length-2){
+                    val hLength = upgradedHammingDist(word,word.length,key,key.length)
+                    if (hLength <= 2){
+                        return key
+                    }
                 }
             }
         }
+        for (word in singleList){
+            for (key in testData.oneWord.keys){
+                if(key.length <= word.length+2 && key.length  >= word.length-2){
+                    val hLength = upgradedHammingDist(word,word.length,key,key.length)
+                    if (hLength <= 2){
+                        return key
+                    }
+                }
+            }
+        }
+
+        return null
     }
+
+
+
+//    fun checklist(){
+//        val singleWordArrayList = java.util.ArrayList<String>()
+//        val doubleWordArrayList = java.util.ArrayList<String>()
+//        val tripleWordArrayList = java.util.ArrayList<String>()
+//        singleWordArrayList.add("hello")
+//        singleWordArrayList.add("world")
+//        singleWordArrayList.add("i")
+//        singleWordArrayList.add("am")
+//        singleWordArrayList.add("good")
+//        singleWordArrayList.add("how")
+//        singleWordArrayList.add("are")
+//        singleWordArrayList.add("heyoullo")
+//        singleWordArrayList.add("hello")
+//
+//        for (i in 0 until singleWordArrayList.size-2){
+//            doubleWordArrayList.add(singleWordArrayList[i] + " " + singleWordArrayList[i+1])
+//            tripleWordArrayList.add(singleWordArrayList[i] + " " + singleWordArrayList[i+1] + " " +singleWordArrayList[i+2])
+//        }
+//        doubleWordArrayList.add(singleWordArrayList[singleWordArrayList.size-2]+ " " + singleWordArrayList[singleWordArrayList.size-1])
+//
+//        for (word in tripleWordArrayList){
+//            Log.i("listwords",word)
+//        }
+//    }
+
 
     fun toGrayscale(bmpOriginal: Bitmap): Bitmap? {
         val height: Int = bmpOriginal.height
@@ -711,6 +819,41 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             }
         }
 
+    }
+
+    fun upgradedHammingDist(str1: String, str1_length: Int, str2: String, str2_length: Int): Int {
+        var i = 0
+        var j = 0
+        var count = 0
+        var direction = 1
+        var backwardIndex1 = str1_length - 1
+        var backwardIndex2 = str2_length - 1
+        var forwardIndex1 = 0
+        var forwardIndex2 = 0
+        while (i < str1_length && j < str2_length) {
+            if (direction == 1) {
+                direction = if (str1[forwardIndex1] != str2[forwardIndex2]) {
+                    count++
+                    -1
+                } else {
+                    1
+                }
+                forwardIndex1 += 1
+                forwardIndex2 += 1
+            } else {
+                direction = if (str1[backwardIndex1] != str2[backwardIndex2]) {
+                    count++
+                    1
+                } else {
+                    -1
+                }
+                backwardIndex1 -= 1
+                backwardIndex2 -= 1
+            }
+            i++
+            j++
+        }
+        return count + Math.abs((str1_length - str2_length) / 2)
     }
 
 }
