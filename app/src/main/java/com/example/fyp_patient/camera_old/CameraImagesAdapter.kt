@@ -35,7 +35,7 @@ class CameraImagesAdapter(
                 (context as CameraImageRecycleViewActivity).removeItem(adapterPosition)
             }
             if (p0.id == itemView.uploadButton.id) {
-                (context as CameraImageRecycleViewActivity).uploadImageIntoDrive(adapterPosition)
+                (context as CameraImageRecycleViewActivity).uploadImages(adapterPosition)
             }
         }
     }

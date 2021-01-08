@@ -25,4 +25,14 @@ object DriveFileList {
         }
         return isFileAvailable
     }
+    fun getFolderId(fileName: String): String? {
+        var fileId = ""
+        for (file in uploadedFileList){
+            if(file.name == fileName){
+                fileId = file.id
+                break
+            }
+        }
+        return fileId
+    }
 }

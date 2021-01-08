@@ -166,28 +166,47 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
         navigationView.setNavigationItemSelectedListener(this)
 
-        val checkTestList = dataRepos.testNamesList()
-        if (checkTestList.contains("cTnI")){
-            Log.i("myocrtest", "found an item")
+
+//        listFilesInDrive()
+//        uploadImages()
+
+    }
+
+    fun uploadImages(position: Int){
+        val thread1 : Thread = Thread{
+            listFilesInDrive()
         }
+        thread1.start()
 
-        listFilesInDrive()
+        val thread2 = Thread{
+            thread1.join()
+            if (DriveFileList.isFileAvailable("finalmedfol")){
+                Log.i("uploadingImages",DriveFileList.getFolderId("finalmedfol")!!)
+                val folderId = DriveFileList.getFolderId("finalmedfol")
+                uploadImageIntoDrive(position,folderId!!)
+            }else{
+                createFolderInDrive("finalmedfol", position)
+            }
+        }
+        thread2.start()
 
-//        mDriveServiceHelper?.createFolder("MEDICO", null)
-//            ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
-//                progressDialog!!.dismiss()
-//                Log.i(
-//                    "creatingfol",
-//                    "Successfully Uploaded. File Id :$googleDriveFileHolder"
-//                )
-//            })
-//            ?.addOnFailureListener { e ->
-//                progressDialog!!.dismiss()
-//                Log.i(
-//                    "creatingfol",
-//                    "Failed to Upload. File Id :" + e.message
-//                )
-//            }
+    }
+
+    fun createFolderInDrive(folderName : String, position: Int){
+        mDriveServiceHelper?.createFolder(folderName, null)
+            ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
+                uploadImages(position)
+                Log.i(
+                    "creatingfol",
+                    "Successfully Uploaded. File Id :$googleDriveFileHolder"
+                )
+            })
+            ?.addOnFailureListener { e ->
+                Log.i(
+                    "creatingfol",
+                    "Failed to Upload. File Id :" + e.message
+                )
+            }
     }
 
     //check the permissions and open the camera
@@ -305,7 +324,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
                 i++
             }
         }else if (data.data != null){
-            val uri = data?.data
+            val uri = data.data
             ImageURIHolder.addUri(uri!!)
             val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
             readText(bitmap)
@@ -350,10 +369,10 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
                 thread1.join()
 
                 for (i in DriveFileList.driveFileList()) {
-                    Log.i("myfilelist", i.toString())
+                    Log.i("myFileList", i.toString())
                 }
                 val check = DriveFileList.isFileAvailable("MyPDFFile")
-                Log.i("myfilelist", check.toString())
+                Log.i("myFileList", check.toString())
 
 
             } catch (e: Exception) {
@@ -367,7 +386,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
     }
 
     //
-    fun uploadImageIntoDrive(position: Int) {
+    private fun uploadImageIntoDrive(position: Int, folderId: String) {
         val thread1 = Thread {
             runOnUiThread {
                 uploading_animation_cover.visibility = View.VISIBLE
@@ -409,7 +428,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             mDriveServiceHelper?.uploadFile(
                 compressedImageFile,
                 "application/octet-stream",
-                "1l_mz2QPAAO-GkrgRaEfnO454qjOFIhiN"
+                folderId
             )
                 ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
                     removeItem(position)
@@ -437,9 +456,9 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         val projection =
             arrayOf(MediaStore.Images.Media.DATA)
         val cursor: Cursor = contentResolver.query(uri, projection, null, null, null)!!
-        val column_index: Int = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
+        val columnIndex: Int = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA)
         cursor.moveToFirst()
-        return cursor.getString(column_index)
+        return cursor.getString(columnIndex)
     }
 
 
@@ -626,10 +645,10 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
         }
          val match = findMatchingWords(singleWordArrayList,doubleWordArrayList,tripleWordArrayList)
-         Log.i("matchingword",match)
+//         Log.i("matchingword",match)
     }
 
-    fun findMatchingWords(singleList: java.util.ArrayList<String>,doubleList: java.util.ArrayList<String>,tripleList: java.util.ArrayList<String>):String?{
+    private fun findMatchingWords(singleList: java.util.ArrayList<String>, doubleList: java.util.ArrayList<String>, tripleList: java.util.ArrayList<String>):String?{
         for (word in tripleList){
             if (testData.threeWord.containsKey(word)){
 //                Log.i("tagname",word)
