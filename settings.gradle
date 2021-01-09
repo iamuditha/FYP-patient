@@ -1,2 +1,2 @@
-rootProject.name='FYP-Patient'
+rootProject.name='Patient'
 include ':app'

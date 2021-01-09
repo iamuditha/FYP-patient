@@ -1,16 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    android:clipToPadding="false"
+    tools:context=".signIn.SignInActivity">
 
-    <com.google.android.gms.common.SignInButton
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/sign_in_button"
-        android:layout_width="match_parent"
-        android:padding="20dp"
-        android:layout_height="wrap_content" />
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/intro_animation"
+        android:layout_width="wrap_content"
+        android:layout_height="300dp"
+        app:layout_constraintBottom_toTopOf="@+id/sign_in_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:lottie_rawRes="@raw/sign_in"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"/>
 
-</LinearLayout>
+<com.shobhitpuri.custombuttons.GoogleSignInButton
+    android:id="@+id/sign_in_button"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="60dp"
+    android:layout_marginEnd="60dp"
+    android:layout_marginBottom="65dp"
+    android:elevation="55dp"
+    android:outlineProvider="bounds"
+    android:text="@string/google_sign_up"
+    app:isDarkTheme="true"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+ />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

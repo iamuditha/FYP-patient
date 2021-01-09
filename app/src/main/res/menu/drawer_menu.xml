@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/group1"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/camera"
+            android:title="CAMERA"
+            android:icon="@drawable/camera_icon"/>
+        <item
+            android:id="@+id/gallery"
+            android:title="GALLERY"
+            android:icon="@drawable/gallery"/>
+        <item
+            android:id="@+id/barcode"
+            android:title="SCAN QR"
+            android:icon="@drawable/qr"/>
+
+    </group>
+
+    <group
+        android:id="@+id/group2"
+        android:checkableBehavior="single">
+        <item
+            android:id="@+id/logout1"
+            android:title="LOG OUT"
+            android:icon="@drawable/logout"/>
+
+    </group>
+
+</menu>
