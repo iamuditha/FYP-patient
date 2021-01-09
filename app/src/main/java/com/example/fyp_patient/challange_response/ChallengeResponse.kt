@@ -1,56 +1,61 @@
 package com.example.fyp_patient.challange_response
 
+import ChallengeResponse.MessageObject
+import ChallengeResponse.MessageSerializerHandler
+import ChallengeResponse.MessageType
+import android.app.Service
+import android.content.Intent
+import android.os.Build
 import android.os.Handler
+import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.RequiresApi
 import crypto.AsymmetricEncDec
 import crypto.KeyHandler
+import io.socket.client.Ack
 import io.socket.client.IO
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
 import org.json.JSONException
 import org.json.JSONObject
-import java.nio.charset.StandardCharsets
 import java.security.PublicKey
-import java.security.SecureRandom
 import java.util.*
-import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
 import kotlin.math.floor
 
-class ChallengeResponse(private val did: String, private val id: String
-                        ) {
+class ChallengeResponse (private val did: String, private val id: String)  {
 
     private var isValidated : Boolean = false
     private var publicKeyString : String = "-----BEGIN RSA PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj8SmQnY22Mfus5H1Vd6NqaJnVGVXgRncMdSWx1sVo8VQowTrTLz9VqOD9foorGDzIKnPxP7HC9kmuqTsKlOus2GcN8F01PqJVlvR2TGGDLAXdg9k2uokHEvnC5A56VVvSHgrpmloSyWc3VCRhFlzVW0LRYf9Ksp+NsPpoxrGM4S5VdVguzIurdoKNwpZIYlEgm+lzSQlJjc/H2zHC7TxGGjJe1zC/AgdiSMaw1M4QFX7yR3hTtJv+tmNGBIF7GCdjB+bHOIODhg+gdeW0Zk+1wlXHe1ZITfz/qe1Aq5Uh4G0RUb02D+hi7wGR10B0shCNWwKOVXRnsIPZ5Spmote7QIDAQAB------END RSA PUBLIC KEY-----"
 
 
 
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
     fun challengeResponse(){
 
         val opts = IO.Options()
         opts.query = "type=patient&&id=${id}"
 
-
-        val challenge = getRandomString()?.let { MessageObject(MessageType.CHALLENGE, it) }!!
-        Log.i("clg", challenge.getMessage() + " my message")
-        val serializerHandler: MessageSerializerHandler? = MessageSerializerHandler.instance;
-        var challengeString = serializerHandler?.serialize(challenge)
-        val keyGenerator: KeyGenerator = KeyGenerator.getInstance("DES");
-        val secureRandom: SecureRandom = SecureRandom()
-        Log.i("clg",  " my message1")
-        keyGenerator.init(secureRandom)
-        var secretKey: SecretKey = keyGenerator.generateKey();
-
-        val cipher: Cipher = Cipher.getInstance("DES/ECB/PKCS5Padding")
-        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-        var challengeString1 = cipher.doFinal(challengeString!!.toByteArray())
-        val messageString: String = String(challengeString1, StandardCharsets.UTF_8);
-        val secretKeyString : String = String(secretKey.encoded, StandardCharsets.UTF_8)
+        val challengeString:String = getRandomString()
         val publicKey:PublicKey = KeyHandler.getInstance().loadRSAPublicFromPlainText(publicKeyString)
-        val encodedSecretKeyString : String = AsymmetricEncDec.getInstance().encryptString(secretKeyString, publicKey)
-        val jsonObject = createMessage(did, messageString,encodedSecretKeyString)
+        val encodedChallengeString : String = AsymmetricEncDec.getInstance().encryptString(challengeString, publicKey)
+        val messageObject: MessageObject = MessageObject(MessageType.CHALLENGE, encodedChallengeString)
+
+        val serializerHandler: MessageSerializerHandler? = MessageSerializerHandler.getInstance();
+        var serializedMessageObjectA: String? = serializerHandler?.serialize(messageObject)
+//        val keyGenerator: KeyGenerator = KeyGenerator.getInstance("DES");
+//        val secureRandom: SecureRandom = SecureRandom()
+
+//        keyGenerator.init(secureRandom)
+//        var secretKey: SecretKey = keyGenerator.generateKey();
+
+//        val cipher: Cipher = Cipher.getInstance("DES/ECB/PKCS5Padding")
+//        cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+//        var challengeString1 = cipher.doFinal(challengeString!!.toByteArray())
+//        val messageString: String = String(challengeString1, StandardCharsets.UTF_8);
+//        val secretKeyString : String = String(secretKey.encoded, StandardCharsets.UTF_8)
+        val jsonObject = serializedMessageObjectA?.let { createMessage(did, it) }
+        Log.i("clg",jsonObject.toString())
 //        val jsonObject = createMessage(did, messageString)
 
 //        cipher.init(Cipher.DECRYPT_MODE, secretKey)
@@ -60,34 +65,45 @@ class ChallengeResponse(private val did: String, private val id: String
 //        val obj2 = serializerHandler?.deserialize(challengeString)
 //
 //        val obj = serializerHandler?.deserialize(dec) as MessageObject
-        val socket = IO.socket("https://fe071c124e4b.ngrok.io",opts)
+        val socket = IO.socket(" https://58585021af19.ngrok.io",opts)
 
         socket.on(Socket.EVENT_CONNECT, Emitter.Listener {
-                socket.emit("sendTo",jsonObject)
+            socket.emit("sendTo",jsonObject, Ack{ param ->
+                val responseData = param[0]
+                Log.i("servera", "abc$responseData")
 
-        }).on("fromServer", Emitter.Listener {
-            fun call(vararg  objects:Any?) {
-                val myJSON = objects[0] as JSONObject
-                val id = myJSON.get("id")
-                val msg = myJSON.get("msg")
+            })
 
-                val messageObject : MessageObject = MessageSerializerHandler.instance?.deserialize(msg as String) as MessageObject
-                when(messageObject.getType()){
-                    MessageType.CHALLENGE -> Log.i("message","Invalid...........")
-                    MessageType.RESPONSE -> responseHandler(socket,messageObject.getMessage(),challenge.getMessage())
-                    MessageType.DECRYPTION_KEY -> Log.i("message","Invalid...........")
-                    MessageType.TERMINATE -> Log.i("message","Invalid...........")
-                    MessageType.PING -> ping(socket)
-                    MessageType.VALIDATION -> Log.i("message", "Invalid.........")
-                }
+        }).on("fromServer") { parameters ->
+
+            val myJSON = parameters[0] as JSONObject
+            val myJsonCall = parameters[1] as JSONObject
+            Log.i("servera", myJsonCall.toString())
+            val id = myJSON.get("id")
+            val msg = myJSON.get("msg")
+
+            val messageObject: MessageObject = MessageSerializerHandler.getInstance()
+                ?.deserialize(msg as String) as MessageObject
+            when (messageObject.messageType) {
+                MessageType.CHALLENGE -> Log.i("message", "Invalid...........")
+                MessageType.RESPONSE -> responseHandler(
+                    socket,
+                    messageObject.msg,
+                    challengeString
+                )
+                MessageType.DECRYPTION_KEY -> Log.i("message", "Invalid...........")
+                MessageType.TERMINATE -> Log.i("message", "Invalid...........")
+                MessageType.PING -> ping(socket)
+                MessageType.VALIDATION -> Log.i("message", "Invalid.........")
             }
-        })
+
+        }
         socket.on(Socket.EVENT_DISCONNECT) { Log.i("msg", "asdfghjhgfds") }
         socket.connect()
     }
 
 
-    private fun getRandomString(): String? {
+    private fun getRandomString(): String {
         val length = floor(Math.random()*10+20).toInt()
         val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
         val salt = StringBuilder()
@@ -100,16 +116,22 @@ class ChallengeResponse(private val did: String, private val id: String
     }
 
     private fun responseHandler(socket: Socket,message: String, challenge: String) {
+        Log.i("tag1","works")
         if (message.equals(challenge)){
             isValidated = true
+            val decryptionKey = "decryption key"
+            val publicKey:PublicKey = KeyHandler.getInstance().loadRSAPublicFromPlainText(publicKeyString)
+            val encodedDecryptionKey : String = AsymmetricEncDec.getInstance().encryptString(decryptionKey, publicKey)
+
             socket.emit("sendTo", createMessage(did,
-                MessageSerializerHandler.instance?.serialize(MessageObject(MessageType.VALIDATION,"True"))!!
+                MessageSerializerHandler.getInstance()?.serialize(MessageObject(MessageType.DECRYPTION_KEY,encodedDecryptionKey))!!
             ))
-            Log.i("did","response handler works")
+            Log.i("clg","response handler works")
         }else{
             socket.emit("sendTo", createMessage(did,
-                MessageSerializerHandler.instance?.serialize(MessageObject(MessageType.VALIDATION,"False"))!!
+                MessageSerializerHandler.getInstance()?.serialize(MessageObject(MessageType.VALIDATION,"False"))!!
             ))
+            Log.i("clg","response handler failed")
         }
     }
 
@@ -120,7 +142,7 @@ class ChallengeResponse(private val did: String, private val id: String
     private fun mTerminate(socket: Socket) {
         isValidated =false
         socket.emit("sendTo", createMessage(did,
-            MessageSerializerHandler.instance?.serialize(MessageObject(MessageType.TERMINATE,"terminate"))!!
+            MessageSerializerHandler.getInstance()?.serialize(MessageObject(MessageType.TERMINATE,"terminate"))!!
         ))
         socket.disconnect()
     }
@@ -128,8 +150,8 @@ class ChallengeResponse(private val did: String, private val id: String
     private fun ping(socket: Socket) {
         Handler(Looper.getMainLooper()).postDelayed({
             socket.emit("sendTo", createMessage(did,
-                MessageSerializerHandler.instance?.serialize(MessageObject(MessageType.PING,"ping"))!!
-            ))        }, 5*60*1000)
+                MessageSerializerHandler.getInstance()?.serialize(MessageObject(MessageType.PING,"ping"))!!
+            ))        }, 10*1000)
     }
 
     private fun createMessage(id:String,message: String): JSONObject {
@@ -153,6 +175,7 @@ class ChallengeResponse(private val did: String, private val id: String
         }
         return jsonObject
     }
+
 
 
 }
