@@ -52,13 +52,11 @@ import id.zelory.compressor.Compressor
 import kotlinx.android.synthetic.main.activity_imagerecycleview.*
 import kotlinx.android.synthetic.main.toolbar.*
 import kotlinx.android.synthetic.main.toolbar_layout.*
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
+import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.abs
 
 
 class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickListener,
@@ -106,7 +104,12 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
 
 //    checklist()
-        val checklength=upgradedHammingDist("iver Profile","iver Profile".length,"Lipid Profile","Lipid Profile".length)
+        val checklength=upgradedHammingDist(
+            "iver Profile",
+            "iver Profile".length,
+            "Lipid Profile",
+            "Lipid Profile".length
+        )
 
         Log.i("distance", checklength.toString())
         val actionBarDrawerToggle = ActionBarDrawerToggle(
@@ -181,9 +184,9 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         val thread2 = Thread{
             thread1.join()
             if (DriveFileList.isFileAvailable("finalmedfol")){
-                Log.i("uploadingImages",DriveFileList.getFolderId("finalmedfol")!!)
+                Log.i("uploadingImages", DriveFileList.getFolderId("finalmedfol")!!)
                 val folderId = DriveFileList.getFolderId("finalmedfol")
-                uploadImageIntoDrive(position,folderId!!)
+                uploadImageIntoDrive(position, folderId!!)
             }else{
                 createFolderInDrive("finalmedfol", position)
             }
@@ -192,7 +195,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
     }
 
-    fun createFolderInDrive(folderName : String, position: Int){
+    fun createFolderInDrive(folderName: String, position: Int){
         mDriveServiceHelper?.createFolder(folderName, null)
             ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
                 uploadImages(position)
@@ -634,8 +637,8 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
                         }
 
                         for (j in 0 until singleWordArrayList.size-2){
-                            doubleWordArrayList.add(singleWordArrayList[j] + " " + singleWordArrayList[j+1])
-                            tripleWordArrayList.add(singleWordArrayList[j] + " " + singleWordArrayList[j+1] + " " +singleWordArrayList[j+2])
+                            doubleWordArrayList.add(singleWordArrayList[j] + " " + singleWordArrayList[j + 1])
+                            tripleWordArrayList.add(singleWordArrayList[j] + " " + singleWordArrayList[j + 1] + " " + singleWordArrayList[j + 2])
                         }
 //                        doubleWordArrayList.add(singleWordArrayList[singleWordArrayList.size-2]+ " " + singleWordArrayList[singleWordArrayList.size-1])
                     }
@@ -644,11 +647,19 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             }
 
         }
-         val match = findMatchingWords(singleWordArrayList,doubleWordArrayList,tripleWordArrayList)
+         val match = findMatchingWords(
+             singleWordArrayList,
+             doubleWordArrayList,
+             tripleWordArrayList
+         )
 //         Log.i("matchingword",match)
     }
 
-    private fun findMatchingWords(singleList: java.util.ArrayList<String>, doubleList: java.util.ArrayList<String>, tripleList: java.util.ArrayList<String>):String?{
+    private fun findMatchingWords(
+        singleList: java.util.ArrayList<String>,
+        doubleList: java.util.ArrayList<String>,
+        tripleList: java.util.ArrayList<String>
+    ):String?{
         for (word in tripleList){
             if (testData.threeWord.containsKey(word)){
 //                Log.i("tagname",word)
@@ -669,7 +680,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         for (word in tripleList){
           for (key in testData.threeWord.keys){
               if(key.length <= word.length+2 && key.length  >= word.length-2){
-                  val hLength = upgradedHammingDist(word,word.length,key,key.length)
+                  val hLength = upgradedHammingDist(word, word.length, key, key.length)
                   if (hLength <= 2){
                       return key
                   }
@@ -679,7 +690,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         for (word in doubleList){
             for (key in testData.twoWords.keys){
                 if(key.length <= word.length+2 && key.length  >= word.length-2){
-                    val hLength = upgradedHammingDist(word,word.length,key,key.length)
+                    val hLength = upgradedHammingDist(word, word.length, key, key.length)
                     if (hLength <= 2){
                         return key
                     }
@@ -689,7 +700,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         for (word in singleList){
             for (key in testData.oneWord.keys){
                 if(key.length <= word.length+2 && key.length  >= word.length-2){
-                    val hLength = upgradedHammingDist(word,word.length,key,key.length)
+                    val hLength = upgradedHammingDist(word, word.length, key, key.length)
                     if (hLength <= 2){
                         return key
                     }
@@ -872,7 +883,9 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             i++
             j++
         }
-        return count + Math.abs((str1_length - str2_length) / 2)
+        return count + abs((str1_length - str2_length) / 2)
     }
+    
+
 
 }

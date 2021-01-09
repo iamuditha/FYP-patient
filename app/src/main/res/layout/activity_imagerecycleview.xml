@@ -108,14 +108,14 @@
                 <!--                    android:layout_height="59dp"-->
                 <!--                    android:text="upload something" />-->
 
-                <!--                <Button-->
-                <!--                    android:id="@+id/bar"-->
-                <!--                    android:layout_width="181dp"-->
-                <!--                    android:layout_height="59dp"-->
-                <!--                    android:layout_alignParentEnd="true"-->
-                <!--                    android:layout_marginStart="38dp"-->
-                <!--                    android:layout_marginEnd="11dp"-->
-                <!--                    android:text="QR Reader" />-->
+<!--                                <Button-->
+<!--                                    android:id="@+id/bar"-->
+<!--                                    android:layout_width="181dp"-->
+<!--                                    android:layout_height="59dp"-->
+<!--                                    android:layout_alignParentEnd="true"-->
+<!--                                    android:layout_marginStart="38dp"-->
+<!--                                    android:layout_marginEnd="11dp"-->
+<!--                                    android:text="QR Reader" />-->
 
             </RelativeLayout>
 
