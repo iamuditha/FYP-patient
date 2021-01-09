@@ -2,7 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.fyp_patient">
 
-    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- <uses-feature android:name="android.hardware.type.watch" /> -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <uses-feature android:name="android.hardware.type.watch" />
+
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -20,35 +23,55 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".OCR.OcrCaptureActivity" />
+
+        <uses-library
+            android:name="com.google.android.wearable"
+            android:required="true" />
+
+        <!--
+               Set to true if your app is Standalone, that is, it does not require the handheld
+               app to run.
+        -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
 
         <activity
             android:name=".DisplayDoctorDetailsActivity"
-            android:theme="@style/AppTheme.winningTheme" />
-        <activity android:name=".SplashScreenActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/newAppTheme">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
+            android:theme="@style/AppTheme.winningTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
-        <activity android:name=".BarCodeReaderActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/newAppTheme"/>
-        <activity android:name=".camera_old.FullScreenImageActivity" /> <!-- <activity -->
 
+
+        <activity android:name=".BarCodeReaderActivity"></activity>
+        <activity android:name=".camera.FullScreenImageActivity" />
+<!--        <activity-->
+<!--            android:name=".camra.FullscreenActivity"-->
+<!--            android:configChanges="orientation|keyboardHidden|screenSize"-->
+<!--            android:label="@string/title_activity_fullscreen"-->
+<!--            android:theme="@style/FullscreenTheme" />-->
         <activity android:name=".signIn.SignInActivity">
-        </activity>
-        <activity
-            android:name=".camera_old.CameraImageRecycleViewActivity"
-            android:screenOrientation="sensorPortrait"
-            android:theme="@style/newAppTheme" />
 
-        <meta-data
-            android:name="preloaded_fonts"
-            android:resource="@array/preloaded_fonts" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".camera.CameraImageRecycleViewActivity" />
+        <service
+            android:name=".challange_response.ChallengeResponseService"
+            android:enabled="true"
+            android:stopWithTask="false">
+
+        </service>
+
+
     </application>
 
 </manifest>

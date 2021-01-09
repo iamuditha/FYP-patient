@@ -6,6 +6,7 @@ import android.util.DisplayMetrics
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.fyp_patient.challange_response.ChallengeResponseService
 import com.google.gson.Gson
 import crypto.VC.CredentialSubject
 import crypto.VC.VCCover
@@ -64,8 +65,10 @@ class DisplayDoctorDetailsActivity : AppCompatActivity() {
     }
     private fun onContinueBtnPressed(btn: Button) {
         //challange response protocal
-        btn.setOnClickListener {
 
+        btn.setOnClickListener {
+            val intent = Intent(baseContext, ChallengeResponseService::class.java)
+            startService(intent)
         }
     }
     private fun onCancelButtonPressed(btn: Button) {
