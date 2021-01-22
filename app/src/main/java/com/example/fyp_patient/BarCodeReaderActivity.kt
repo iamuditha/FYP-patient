@@ -31,7 +31,6 @@ import org.json.JSONException
 import org.json.JSONObject
 import org.web3j.protocol.Web3j
 import utilities.EthFunctions
-import utilities.EthFunctions.createWallet
 import java.util.*
 import kotlin.math.floor
 
@@ -45,6 +44,8 @@ class BarCodeReaderActivity : BaseActivity() {
     private lateinit var detector : BarcodeDetector
     private var did : String? = null
 
+    var count = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_bar_code_reader)
@@ -53,8 +54,8 @@ class BarCodeReaderActivity : BaseActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
 
-        checkPermissionAndOpenCamera()
 
+        checkPermissionAndOpenCamera()
 
 //        if (ContextCompat.checkSelfPermission(
 //                this@BarCodeReaderActivity,
@@ -159,19 +160,20 @@ class BarCodeReaderActivity : BaseActivity() {
         override fun receiveDetections(detections: Detector.Detections<Barcode>?) {
 
             if (detections != null && detections.detectedItems != null){
-//                val qrCodes: SparseArray<Barcode> = detections.detectedItems
-//                val code = qrCodes.valueAt(0)
-//                textScanResult.text = code.displayValue
-//                did = code.displayValue
-//                detector.release()
+
+                val qrCodes: SparseArray<Barcode> = detections.detectedItems
+                val code = qrCodes.valueAt(0)
+                textScanResult.text = code.displayValue
+                did = code.displayValue
+
+                Log.i("myQRCode",did)
 
                 if (did != null){
 //                    cameraSource.stop()
 
-                    Log.i("did", "i am cdhgghdfalled$did")
+                    Log.i("did", "i am called $did")
 //                    cameraSurfaceView.visibility = View.INVISIBLE
 //                    Toast.makeText(this@BarCodeReaderActivity, "scanned", Toast.LENGTH_SHORT).show()
-                    /********display a loading item ************/
 //                    val web3j :Web3j = EthFunctions.connect("https://mainnet.infura.io/v3/898d9e570ec143d6ada30bfdeab9572c")
                     val iamContractorHandler = IAMContractorHandler.getInstance()
 //
@@ -193,9 +195,11 @@ class BarCodeReaderActivity : BaseActivity() {
 //                    val isValidate : Boolean = mainContract.validateDoctor(did, "profile hash", "claim hash").send()
 
                     val isValidate = true
-                    if (isValidate){
-                        val intent: Intent = Intent(applicationContext, DisplayDoctorDetailsActivity::class.java)
-                        intent.putExtra("vcString", vc)
+                    if (isValidate && count == 0){
+                        count++
+//                        detector.release()
+                        val intent: Intent = Intent(applicationContext, VerifierActivity::class.java)
+                        intent.putExtra("did", did)
                         startActivity(intent)
 
                     }else{

@@ -13,7 +13,7 @@ import crypto.VC.VCCover
 
 class DisplayDoctorDetailsActivity : AppCompatActivity() {
 
-    lateinit var vcCover: VCCover
+//    lateinit var vcCover: VCCover
 
     lateinit var fNameTV:TextView
     lateinit var lNameTV:TextView
@@ -26,9 +26,9 @@ class DisplayDoctorDetailsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_display_doctor_details)
         val intent = intent;
-        val vcString =  intent.getStringExtra("vcString")
+//        val vcString =  intent.getStringExtra("vcString")
         val gson: Gson = Gson()
-        vcCover = gson.fromJson(vcString, VCCover::class.java)
+//        vcCover = gson.fromJson(vcString, VCCover::class.java)
 
         //initialize xml
         fNameTV = findViewById(R.id.fName)
@@ -56,12 +56,12 @@ class DisplayDoctorDetailsActivity : AppCompatActivity() {
     }
 
     private fun setDisplayTexts() {
-        val credentialSubject:CredentialSubject = vcCover.verifiableClaim.credentialSubject
-        fNameTV.text = credentialSubject.firstName
-        lNameTV.text = credentialSubject.lastName
-        hospitalTV.text = credentialSubject.hospital;
-        specialityTV.text = credentialSubject.speciality;
-        genderTV.text = credentialSubject.gender;
+//        val credentialSubject:CredentialSubject = vcCover.verifiableClaim.credentialSubject
+        fNameTV.text = "credentialSubject.firstName"
+        lNameTV.text = "credentialSubject.lastName"
+        hospitalTV.text = "credentialSubject.hospital";
+        specialityTV.text = "credentialSubject.speciality";
+        genderTV.text = "credentialSubject.gender;"
     }
     private fun onContinueBtnPressed(btn: Button) {
         //challange response protocal

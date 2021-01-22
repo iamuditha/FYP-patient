@@ -1,6 +1,7 @@
 package com.example.fyp_patient.camera_old
 
 
+import ContractorHandlers.IAMContractorHandler
 import android.app.Activity
 import android.app.ProgressDialog
 import android.content.ContentValues
@@ -52,7 +53,14 @@ import id.zelory.compressor.Compressor
 import kotlinx.android.synthetic.main.activity_imagerecycleview.*
 import kotlinx.android.synthetic.main.toolbar.*
 import kotlinx.android.synthetic.main.toolbar_layout.*
+import org.web3j.crypto.WalletUtils
+import org.web3j.protocol.Web3j
+import org.web3j.protocol.http.HttpService
 import java.io.*
+import java.net.URL
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -110,6 +118,8 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             "Lipid Profile",
             "Lipid Profile".length
         )
+
+//        verifyWithBlockChain()
 
         Log.i("distance", checklength.toString())
         val actionBarDrawerToggle = ActionBarDrawerToggle(
@@ -210,6 +220,99 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
                     "Failed to Upload. File Id :" + e.message
                 )
             }
+    }
+
+    private fun verifyWithBlockChain() {
+
+        val thread = Thread{
+            val web3j: Web3j = Web3j.build(HttpService("https://c4375655a390.ngrok.io"))
+//            val web3j : Web3j = EthFunctions.connect("https://c4375655a390.ngrok.io")
+            val credentials = WalletUtils.loadBip39Credentials(
+                "123456",
+                UUID.randomUUID().toString()
+            )
+            val iamContract = IAMContractorHandler.getInstance().getWrapperForContractor(
+                web3j, getString(
+                    R.string.main_contractor_address
+                ), credentials
+            )
+            val doctorDetails=IAMContractorHandler.getInstance().getDoctorDetails(
+                iamContract,
+                "did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM="
+            )
+
+            val hash = IAMContractorHandler.getInstance().getDoctorVerifyingDetails(
+                iamContract,
+                "did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM="
+            )
+            val mydidHash  = hash[0]
+            val didLink = doctorDetails[0]
+            val vcLink = doctorDetails[0]
+            Log.i("blockChainInVerifier", doctorDetails.size.toString())
+            Log.i("blockChain", vcLink)
+            Log.i("blockChain", didLink)
+            Log.i("blockChain", mydidHash)
+
+            val mystrign = "{\"created\":\"Jan 22, 2021 14:59:38\",\"id\":\"did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM=\",\"publicKeys\":[{\"controller\":\"did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM=\",\"id\":\"pubKeyzicbmenbnhhhymmtjnjtegjnfmlqqxwbnylcdjcjjokgdgbdnhfqnccvzpmehkzh\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0BllnxNkAsxy8CCOfvKkYD+EFcmgh/v1EquAglRWyVQodsXfA1iHiNDqgonPcep+u/1Vgi7kyckou1QjeJoHIOKMENufNGmDxp30Bw9A3Pj+c/kIZkQceCGRiD2YNyS3LQ3IycilRdyNZ1aetamX8pM5jLgfLu6EPIQw9OxcLjjHvCk1GAKPy5xc7wUG7qIINyhFM6Gn7+1XE9OzFJH3I7hElvsOc90CVo4zjBoSIQTiFQW9o7ReOVyxXU9bRlUglswUe5Z74CSUbi82Dc94UM1Hf4IpOYlRBw/SBzcDDgCgQhEnnCv4sJkEQBv8kRwQ0ik4DTLV1XlvXItGmLpPawIDAQAB\",\"type\":\"RSA\"}],\"service\":[{\"endPoint\":\"-\",\"id\":\"did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM=#medico\",\"publicKeyId\":\"pubKeyzicbmenbnhhhymmtjnjtegjnfmlqqxwbnylcdjcjjokgdgbdnhfqnccvzpmehkzh\",\"serviceName\":\"medico\",\"type\":\"MedicalDataSharingApplication\"}],\"updated\":\"Jan 22, 2021 14:59:38\"}"
+
+            val messageDigestf = MessageDigest.getInstance("sha-512")
+            val h = Base64.getEncoder().encodeToString(mystrign.toByteArray())
+            Log.i("blockChain", h)
+
+
+            val input: InputStream = URL(didLink).openStream()
+            val imageBytes: ByteArray = com.google.android.gms.common.util.IOUtils.toByteArray(input)
+
+            try {
+                val textBuilder = StringBuilder()
+                BufferedReader(
+                    InputStreamReader(
+                        input,
+                        Charset.forName(StandardCharsets.UTF_8.name())
+                    )
+                ).use { reader ->
+                    var c = 0
+                    while (reader.read().also { c = it } != -1) {
+                        textBuilder.append(c.toChar())
+                        Log.i("blockChain", "result " + c.toChar())
+
+                    }
+                }
+            }
+            catch (e : Exception){
+                Log.i("blockChain", "result " + e.toString())
+
+            }
+
+
+            val obj = Base64.getEncoder().encodeToString(imageBytes)
+//            val newobj = String(Base64.getDecoder().decode(imageBytes))
+            Log.i("blockChain", "obj : " + obj)
+//            Log.i("blockChain", "newobj : " + newobj)
+
+            val anotheobh = String(imageBytes)
+            Log.i("blockChain", "anotherobh : " + anotheobh)
+
+
+
+            val messageDigest: MessageDigest = MessageDigest.getInstance("sha-512")
+            val didHash = Base64.getEncoder().encodeToString(messageDigest.digest(anotheobh.toByteArray()))
+
+
+
+            Log.i("blockChain", didHash)
+
+            Log.i("blockChain", (mydidHash == didHash).toString())
+
+
+
+//            didLink.saveTo(filesDir.absolutePath+"/DoctorDid.json")
+//            vcLink.saveTo(filesDir.absolutePath+"/DoctorVc.json")
+
+        }
+        thread.start()
+
+
     }
 
     //check the permissions and open the camera
