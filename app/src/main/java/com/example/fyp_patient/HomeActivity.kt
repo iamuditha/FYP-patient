@@ -58,5 +58,10 @@ class HomeActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        key.setOnClickListener {
+            val intent = Intent(this,DisplayDoctorDetailsActivity::class.java)
+            startActivity(intent)
+        }
+
     }
 }
