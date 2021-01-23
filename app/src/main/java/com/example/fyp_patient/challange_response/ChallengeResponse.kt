@@ -73,8 +73,6 @@ class ChallengeResponse (private val did: String, private val id: String)  {
         }).on("fromServer") { parameters ->
 
             val myJSON = parameters[0] as JSONObject
-            val myJsonCall = parameters[1] as JSONObject
-            Log.i("servera", myJsonCall.toString())
             val id = myJSON.get("id")
             val msg = myJSON.get("msg")
 

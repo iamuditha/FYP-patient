@@ -25,7 +25,7 @@ class DisplayDoctorDetailsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_display_doctor_details)
-        val intent = intent;
+        val intent: Intent = intent;
 //        val vcString =  intent.getStringExtra("vcString")
         val gson: Gson = Gson()
 //        vcCover = gson.fromJson(vcString, VCCover::class.java)
@@ -63,8 +63,7 @@ class DisplayDoctorDetailsActivity : AppCompatActivity() {
         specialityTV.text = "credentialSubject.speciality";
         genderTV.text = "credentialSubject.gender;"
     }
-    private fun onContinueBtnPressed(btn: Button) {
-        //challange response protocal
+    private fun onContinueBtnPressed(btn: Button) =//challange response protocal
 
         btn.setOnClickListener {
             val intent = Intent(baseContext, ChallengeResponseService::class.java)
@@ -72,14 +71,11 @@ class DisplayDoctorDetailsActivity : AppCompatActivity() {
             intent.putExtra("id","pDid")
             startService(intent)
         }
-    }
-    private fun onCancelButtonPressed(btn: Button) {
-        //return to main screen
+    private fun onCancelButtonPressed(btn: Button) =//return to main screen
         btn.setOnClickListener{
             val intent:Intent = Intent(applicationContext, BarCodeReaderActivity::class.java)
             startActivity(intent)
         }
-    }
 
 
 }
