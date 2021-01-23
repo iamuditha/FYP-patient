@@ -26,7 +26,7 @@ import kotlin.math.floor
 class ChallengeResponse (private val did: String, private val id: String)  {
 
     private var isValidated : Boolean = false
-    private var publicKeyString : String = "-----BEGIN RSA PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj8SmQnY22Mfus5H1Vd6NqaJnVGVXgRncMdSWx1sVo8VQowTrTLz9VqOD9foorGDzIKnPxP7HC9kmuqTsKlOus2GcN8F01PqJVlvR2TGGDLAXdg9k2uokHEvnC5A56VVvSHgrpmloSyWc3VCRhFlzVW0LRYf9Ksp+NsPpoxrGM4S5VdVguzIurdoKNwpZIYlEgm+lzSQlJjc/H2zHC7TxGGjJe1zC/AgdiSMaw1M4QFX7yR3hTtJv+tmNGBIF7GCdjB+bHOIODhg+gdeW0Zk+1wlXHe1ZITfz/qe1Aq5Uh4G0RUb02D+hi7wGR10B0shCNWwKOVXRnsIPZ5Spmote7QIDAQAB------END RSA PUBLIC KEY-----"
+    private var publicKeyString : String = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAj8SmQnY22Mfus5H1Vd6NqaJnVGVXgRncMdSWx1sVo8VQowTrTLz9VqOD9foorGDzIKnPxP7HC9kmuqTsKlOus2GcN8F01PqJVlvR2TGGDLAXdg9k2uokHEvnC5A56VVvSHgrpmloSyWc3VCRhFlzVW0LRYf9Ksp+NsPpoxrGM4S5VdVguzIurdoKNwpZIYlEgm+lzSQlJjc/H2zHC7TxGGjJe1zC/AgdiSMaw1M4QFX7yR3hTtJv+tmNGBIF7GCdjB+bHOIODhg+gdeW0Zk+1wlXHe1ZITfz/qe1Aq5Uh4G0RUb02D+hi7wGR10B0shCNWwKOVXRnsIPZ5Spmote7QIDAQAB"
 
 
 
@@ -65,14 +65,10 @@ class ChallengeResponse (private val did: String, private val id: String)  {
 //        val obj2 = serializerHandler?.deserialize(challengeString)
 //
 //        val obj = serializerHandler?.deserialize(dec) as MessageObject
-        val socket = IO.socket(" https://58585021af19.ngrok.io",opts)
+        val socket = IO.socket("https://d38ecdb4ac41.ngrok.io",opts)
 
         socket.on(Socket.EVENT_CONNECT, Emitter.Listener {
-            socket.emit("sendTo",jsonObject, Ack{ param ->
-                val responseData = param[0]
-                Log.i("servera", "abc$responseData")
-
-            })
+            socket.emit("sendTo",jsonObject)
 
         }).on("fromServer") { parameters ->
 

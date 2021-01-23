@@ -68,6 +68,8 @@ class DisplayDoctorDetailsActivity : AppCompatActivity() {
 
         btn.setOnClickListener {
             val intent = Intent(baseContext, ChallengeResponseService::class.java)
+            intent.putExtra("did","Did");
+            intent.putExtra("id","pDid")
             startService(intent)
         }
     }
