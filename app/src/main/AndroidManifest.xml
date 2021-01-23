@@ -19,8 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".VerifierActivity"></activity>
-        <!-- <uses-library -->
+        <activity android:name=".HomeActivity" />
+        <activity android:name=".VerifierActivity" /> <!-- <uses-library -->
         <!-- android:name="com.google.android.wearable" -->
         <!-- android:required="true" /> -->
         <!--
@@ -40,11 +40,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".BarCodeReaderActivity" />
-        <activity android:name=".camera_old.FullScreenImageActivity" /> <!-- <activity -->
-        <!-- android:name=".camra.FullscreenActivity" -->
-        <!-- android:configChanges="orientation|keyboardHidden|screenSize" -->
-        <!-- android:label="@string/title_activity_fullscreen" -->
-        <!-- android:theme="@style/FullscreenTheme" /> -->
+        <activity android:name=".OCR.OcrCaptureActivity"/>
+        <activity android:name=".camera_old.FullScreenImageActivity" />
         <activity android:name=".signIn.SignInActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -57,7 +54,7 @@
         <service
             android:name=".challange_response.ChallengeResponseService"
             android:enabled="true"
-            android:stopWithTask="false"></service>
+            android:stopWithTask="false" />
     </application>
 
 </manifest>

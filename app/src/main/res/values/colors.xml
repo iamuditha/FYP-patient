@@ -2,10 +2,14 @@
 <resources>
     <color name="colorPrimary">#003580</color>
     <color name="colorPrimaryDark">#000066</color>
-    <color name="colorAccent">#03DAC5</color>
+    <color name="colorAccent">#043BB1</color>
     <color name="blackColor">#000</color>
     <color name="lightGrayColor">#a9a9a9</color>
 
     <color name="black_overlay">#66000000</color>
     <color name="gradient_end_color">#18a3fe</color>
+    <color name="blue">#043BB1</color>
+
+    <color name="green">#00ff00</color>
+    <color name="red">#ff0000</color>
 </resources>

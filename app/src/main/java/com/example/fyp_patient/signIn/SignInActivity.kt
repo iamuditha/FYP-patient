@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.example.fyp_patient.HomeActivity
 import com.example.fyp_patient.R
 import com.example.fyp_patient.camera_old.CameraImageRecycleViewActivity
 import com.example.fyp_patient.camera_old.ImageHolder
@@ -47,7 +48,7 @@ class SignInActivity : AppCompatActivity() {
         account?.let { getProfileData(it) }
         if (account != null) {
             clearOldData()
-            val intent = Intent(this, CameraImageRecycleViewActivity::class.java)
+            val intent = Intent(this, HomeActivity::class.java)
             startActivity(intent)
         }
     }

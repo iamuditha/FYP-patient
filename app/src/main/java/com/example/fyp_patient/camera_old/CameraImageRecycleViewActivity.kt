@@ -1,17 +1,12 @@
 package com.example.fyp_patient.camera_old
 
 
-import ContractorHandlers.IAMContractorHandler
 import android.app.Activity
 import android.app.ProgressDialog
-import android.content.ContentValues
-import android.content.Intent
-import android.content.IntentFilter
-import android.content.SharedPreferences
+import android.content.*
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.graphics.*
-import android.media.ExifInterface
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -19,7 +14,6 @@ import android.util.Log
 import android.util.SparseArray
 import android.view.MenuItem
 import android.view.View
-import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -52,15 +46,7 @@ import com.google.api.services.drive.Drive
 import id.zelory.compressor.Compressor
 import kotlinx.android.synthetic.main.activity_imagerecycleview.*
 import kotlinx.android.synthetic.main.toolbar.*
-import kotlinx.android.synthetic.main.toolbar_layout.*
-import org.web3j.crypto.WalletUtils
-import org.web3j.protocol.Web3j
-import org.web3j.protocol.http.HttpService
 import java.io.*
-import java.net.URL
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -72,8 +58,6 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
     var isInActionMode = false
 
-    //    private val uriArrayList = ArrayList<Uri>()
-//    val arrayList = ArrayList<CameraImagesModel>()
     private var driveServiceHelper: DriveServiceHelper? = null
     private var RC_AUTHORIZE_DRIVE = 101
     private val REQUEST_IMAGE_CAPTURE: Int = 100
@@ -98,12 +82,14 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         .build()
     var uploading: AlertDialog? = null
 
-    var progressDialog: ProgressDialog? = null
+    lateinit var progressDialog: ProgressDialog
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_imagerecycleview)
+
+        progressDialog = displayLoading(this,"File is Uploading... Please Wait......")
 
 
         //toolbar and drawer setup
@@ -111,17 +97,9 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         setSupportActionBar(toolbar_main)
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
 
-//    checklist()
-        val checklength=upgradedHammingDist(
-            "iver Profile",
-            "iver Profile".length,
-            "Lipid Profile",
-            "Lipid Profile".length
-        )
-
 //        verifyWithBlockChain()
 
-        Log.i("distance", checklength.toString())
+
         val actionBarDrawerToggle = ActionBarDrawerToggle(
             this,
             drawerLayout,
@@ -180,32 +158,39 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         navigationView.setNavigationItemSelectedListener(this)
 
 
-//        listFilesInDrive()
-//        uploadImages()
+    }
+
+    //display loading dialog
+    private fun displayLoading(context: Context, message: String): ProgressDialog {
+        val progress = ProgressDialog(context)
+        progress.setMessage(message)
+        progress.setProgressStyle(ProgressDialog.STYLE_SPINNER)
+        progress.isIndeterminate = true
+        progress.setCancelable(false)
+        return progress
+    }
+
+    fun uploadImages(position: Int) {
+//        val thread1 = Thread {
+//            listFilesInDrive()
+//        }
+//        thread1.start()
+
+//        val thread2 = Thread {
+//            thread1.join()
+//            if (DriveFileList.isFileAvailable("finalmedfol")) {
+//                Log.i("uploadingImages", DriveFileList.getFolderId("finalmedfol")!!)
+//                val folderId = DriveFileList.getFolderId("finalmedfol")
+//                uploadImageIntoDrive(position, folderId!!)
+//            } else {
+//                createFolderInDrive("finalmedfol", position)
+//            }
+//        }
+//        thread2.start()
 
     }
 
-    fun uploadImages(position: Int){
-        val thread1 : Thread = Thread{
-            listFilesInDrive()
-        }
-        thread1.start()
-
-        val thread2 = Thread{
-            thread1.join()
-            if (DriveFileList.isFileAvailable("finalmedfol")){
-                Log.i("uploadingImages", DriveFileList.getFolderId("finalmedfol")!!)
-                val folderId = DriveFileList.getFolderId("finalmedfol")
-                uploadImageIntoDrive(position, folderId!!)
-            }else{
-                createFolderInDrive("finalmedfol", position)
-            }
-        }
-        thread2.start()
-
-    }
-
-    fun createFolderInDrive(folderName: String, position: Int){
+    fun createFolderInDrive(folderName: String, position: Int) {
         mDriveServiceHelper?.createFolder(folderName, null)
             ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
                 uploadImages(position)
@@ -222,117 +207,117 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             }
     }
 
-    private fun verifyWithBlockChain() {
+//    private fun verifyWithBlockChain() {
+//
+//        val thread = Thread {
+//            val web3j: Web3j = Web3j.build(HttpService("https://c4375655a390.ngrok.io"))
+////            val web3j : Web3j = EthFunctions.connect("https://c4375655a390.ngrok.io")
+//            val credentials = WalletUtils.loadBip39Credentials(
+//                "123456",
+//                UUID.randomUUID().toString()
+//            )
+//            val iamContract = IAMContractorHandler.getInstance().getWrapperForContractor(
+//                web3j, getString(
+//                    R.string.main_contractor_address
+//                ), credentials
+//            )
+//            val doctorDetails = IAMContractorHandler.getInstance().getDoctorDetails(
+//                iamContract,
+//                "did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM="
+//            )
+//
+//            val hash = IAMContractorHandler.getInstance().getDoctorVerifyingDetails(
+//                iamContract,
+//                "did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM="
+//            )
+//            val mydidHash = hash[0]
+//            val didLink = doctorDetails[0]
+//            val vcLink = doctorDetails[0]
+//            Log.i("blockChainInVerifier", doctorDetails.size.toString())
+//            Log.i("blockChain", vcLink)
+//            Log.i("blockChain", didLink)
+//            Log.i("blockChain", mydidHash)
+//
+//            val mystrign =
+//                "{\"created\":\"Jan 22, 2021 14:59:38\",\"id\":\"did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM=\",\"publicKeys\":[{\"controller\":\"did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM=\",\"id\":\"pubKeyzicbmenbnhhhymmtjnjtegjnfmlqqxwbnylcdjcjjokgdgbdnhfqnccvzpmehkzh\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0BllnxNkAsxy8CCOfvKkYD+EFcmgh/v1EquAglRWyVQodsXfA1iHiNDqgonPcep+u/1Vgi7kyckou1QjeJoHIOKMENufNGmDxp30Bw9A3Pj+c/kIZkQceCGRiD2YNyS3LQ3IycilRdyNZ1aetamX8pM5jLgfLu6EPIQw9OxcLjjHvCk1GAKPy5xc7wUG7qIINyhFM6Gn7+1XE9OzFJH3I7hElvsOc90CVo4zjBoSIQTiFQW9o7ReOVyxXU9bRlUglswUe5Z74CSUbi82Dc94UM1Hf4IpOYlRBw/SBzcDDgCgQhEnnCv4sJkEQBv8kRwQ0ik4DTLV1XlvXItGmLpPawIDAQAB\",\"type\":\"RSA\"}],\"service\":[{\"endPoint\":\"-\",\"id\":\"did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM=#medico\",\"publicKeyId\":\"pubKeyzicbmenbnhhhymmtjnjtegjnfmlqqxwbnylcdjcjjokgdgbdnhfqnccvzpmehkzh\",\"serviceName\":\"medico\",\"type\":\"MedicalDataSharingApplication\"}],\"updated\":\"Jan 22, 2021 14:59:38\"}"
+//
+//            val messageDigestf = MessageDigest.getInstance("sha-512")
+//            val h = Base64.getEncoder().encodeToString(mystrign.toByteArray())
+//            Log.i("blockChain", h)
+//
+//
+//            val input: InputStream = URL(didLink).openStream()
+//            val imageBytes: ByteArray =
+//                com.google.android.gms.common.util.IOUtils.toByteArray(input)
+//
+//            try {
+//                val textBuilder = StringBuilder()
+//                BufferedReader(
+//                    InputStreamReader(
+//                        input,
+//                        Charset.forName(StandardCharsets.UTF_8.name())
+//                    )
+//                ).use { reader ->
+//                    var c = 0
+//                    while (reader.read().also { c = it } != -1) {
+//                        textBuilder.append(c.toChar())
+//                        Log.i("blockChain", "result " + c.toChar())
+//
+//                    }
+//                }
+//            } catch (e: Exception) {
+//                Log.i("blockChain", "result " + e.toString())
+//
+//            }
+//
+//
+//            val obj = Base64.getEncoder().encodeToString(imageBytes)
+////            val newobj = String(Base64.getDecoder().decode(imageBytes))
+//            Log.i("blockChain", "obj : " + obj)
+////            Log.i("blockChain", "newobj : " + newobj)
+//
+//            val anotheobh = String(imageBytes)
+//            Log.i("blockChain", "anotherobh : " + anotheobh)
+//
+//
+//            val messageDigest: MessageDigest = MessageDigest.getInstance("sha-512")
+//            val didHash =
+//                Base64.getEncoder().encodeToString(messageDigest.digest(anotheobh.toByteArray()))
+//
+//
+//
+//            Log.i("blockChain", didHash)
+//
+//            Log.i("blockChain", (mydidHash == didHash).toString())
+//
+//
+////            didLink.saveTo(filesDir.absolutePath+"/DoctorDid.json")
+////            vcLink.saveTo(filesDir.absolutePath+"/DoctorVc.json")
+//
+//        }
+//        thread.start()
+//
+//
+//    }
 
-        val thread = Thread{
-            val web3j: Web3j = Web3j.build(HttpService("https://c4375655a390.ngrok.io"))
-//            val web3j : Web3j = EthFunctions.connect("https://c4375655a390.ngrok.io")
-            val credentials = WalletUtils.loadBip39Credentials(
-                "123456",
-                UUID.randomUUID().toString()
-            )
-            val iamContract = IAMContractorHandler.getInstance().getWrapperForContractor(
-                web3j, getString(
-                    R.string.main_contractor_address
-                ), credentials
-            )
-            val doctorDetails=IAMContractorHandler.getInstance().getDoctorDetails(
-                iamContract,
-                "did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM="
-            )
-
-            val hash = IAMContractorHandler.getInstance().getDoctorVerifyingDetails(
-                iamContract,
-                "did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM="
-            )
-            val mydidHash  = hash[0]
-            val didLink = doctorDetails[0]
-            val vcLink = doctorDetails[0]
-            Log.i("blockChainInVerifier", doctorDetails.size.toString())
-            Log.i("blockChain", vcLink)
-            Log.i("blockChain", didLink)
-            Log.i("blockChain", mydidHash)
-
-            val mystrign = "{\"created\":\"Jan 22, 2021 14:59:38\",\"id\":\"did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM=\",\"publicKeys\":[{\"controller\":\"did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM=\",\"id\":\"pubKeyzicbmenbnhhhymmtjnjtegjnfmlqqxwbnylcdjcjjokgdgbdnhfqnccvzpmehkzh\",\"publicKey\":\"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0BllnxNkAsxy8CCOfvKkYD+EFcmgh/v1EquAglRWyVQodsXfA1iHiNDqgonPcep+u/1Vgi7kyckou1QjeJoHIOKMENufNGmDxp30Bw9A3Pj+c/kIZkQceCGRiD2YNyS3LQ3IycilRdyNZ1aetamX8pM5jLgfLu6EPIQw9OxcLjjHvCk1GAKPy5xc7wUG7qIINyhFM6Gn7+1XE9OzFJH3I7hElvsOc90CVo4zjBoSIQTiFQW9o7ReOVyxXU9bRlUglswUe5Z74CSUbi82Dc94UM1Hf4IpOYlRBw/SBzcDDgCgQhEnnCv4sJkEQBv8kRwQ0ik4DTLV1XlvXItGmLpPawIDAQAB\",\"type\":\"RSA\"}],\"service\":[{\"endPoint\":\"-\",\"id\":\"did:medico:zDAHazRBj7KcVFHRtwdEimmpyZoq9TAQGELM=#medico\",\"publicKeyId\":\"pubKeyzicbmenbnhhhymmtjnjtegjnfmlqqxwbnylcdjcjjokgdgbdnhfqnccvzpmehkzh\",\"serviceName\":\"medico\",\"type\":\"MedicalDataSharingApplication\"}],\"updated\":\"Jan 22, 2021 14:59:38\"}"
-
-            val messageDigestf = MessageDigest.getInstance("sha-512")
-            val h = Base64.getEncoder().encodeToString(mystrign.toByteArray())
-            Log.i("blockChain", h)
-
-
-            val input: InputStream = URL(didLink).openStream()
-            val imageBytes: ByteArray = com.google.android.gms.common.util.IOUtils.toByteArray(input)
-
-            try {
-                val textBuilder = StringBuilder()
-                BufferedReader(
-                    InputStreamReader(
-                        input,
-                        Charset.forName(StandardCharsets.UTF_8.name())
-                    )
-                ).use { reader ->
-                    var c = 0
-                    while (reader.read().also { c = it } != -1) {
-                        textBuilder.append(c.toChar())
-                        Log.i("blockChain", "result " + c.toChar())
-
-                    }
-                }
-            }
-            catch (e : Exception){
-                Log.i("blockChain", "result " + e.toString())
-
-            }
-
-
-            val obj = Base64.getEncoder().encodeToString(imageBytes)
-//            val newobj = String(Base64.getDecoder().decode(imageBytes))
-            Log.i("blockChain", "obj : " + obj)
-//            Log.i("blockChain", "newobj : " + newobj)
-
-            val anotheobh = String(imageBytes)
-            Log.i("blockChain", "anotherobh : " + anotheobh)
-
-
-
-            val messageDigest: MessageDigest = MessageDigest.getInstance("sha-512")
-            val didHash = Base64.getEncoder().encodeToString(messageDigest.digest(anotheobh.toByteArray()))
-
-
-
-            Log.i("blockChain", didHash)
-
-            Log.i("blockChain", (mydidHash == didHash).toString())
-
-
-
-//            didLink.saveTo(filesDir.absolutePath+"/DoctorDid.json")
-//            vcLink.saveTo(filesDir.absolutePath+"/DoctorVc.json")
-
-        }
-        thread.start()
-
-
-    }
-
-    //check the permissions and open the camera
-    private fun checkPermissionAndOpenCamera() {
-        //if the system is marshmallow or above get the run time permission
-        if (checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED ||
-            checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED
-        ) {
-            //permission was not enabled
-            val permission = arrayOf(
-                android.Manifest.permission.CAMERA,
-                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-            )
-            //show popup to request permission
-            requestPermissions(permission, REQUEST_IMAGE_CAPTURE)
-        } else {
-            //permission already granted
-            openCamera()
-        }
-    }
+//    //check the permissions and open the camera
+//    private fun checkPermissionAndOpenCamera() {
+//        //if the system is marshmallow or above get the run time permission
+//        if (checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED ||
+//            checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED
+//        ) {
+//            //permission was not enabled
+//            val permission = arrayOf(
+//                android.Manifest.permission.CAMERA,
+//                android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+//            )
+//            //show popup to request permission
+//            requestPermissions(permission, REQUEST_IMAGE_CAPTURE)
+//        } else {
+//            //permission already granted
+//            openCamera()
+//        }
+//    }
 
     //check the permissions and open the gallery
     private fun checkPermissionAndOpenGallery() {
@@ -418,24 +403,24 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
         //call when image is selected from the gallery
         if (requestCode == IMAGE_SELECT_CODE && resultCode == Activity.RESULT_OK) {
-        if (data!!.clipData != null){
-            val count = data.clipData!!.itemCount
-            var i = 0;
-            while (i < count) {
-                val uri = data.clipData!!.getItemAt(i).uri
+            if (data!!.clipData != null) {
+                val count = data.clipData!!.itemCount
+                var i = 0
+                while (i < count) {
+                    val uri = data.clipData!!.getItemAt(i).uri
+                    ImageURIHolder.addUri(uri!!)
+                    val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
+                    readText(bitmap)
+                    ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri))
+                    i++
+                }
+            } else if (data.data != null) {
+                val uri = data.data
                 ImageURIHolder.addUri(uri!!)
                 val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
                 readText(bitmap)
                 ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri))
-                i++
             }
-        }else if (data.data != null){
-            val uri = data.data
-            ImageURIHolder.addUri(uri!!)
-            val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, uri)
-            readText(bitmap)
-            ImageHolder.addImage(CameraImagesModel("title", getCurrentDate(), uri))
-        }
 
             updateView()
 
@@ -446,10 +431,10 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
     private fun updateView() {
         recycleView.layoutManager = LinearLayoutManager(this)
         recycleView.adapter = adapter
-        if(ImageHolder.imageArrayList().size != 0){
+        if (ImageHolder.imageArrayList().size != 0) {
             imageDisplayWhenEmpty.visibility = View.GONE
             emptyTextView.visibility = View.GONE
-        }else{
+        } else {
             imageDisplayWhenEmpty.visibility = View.VISIBLE
             emptyTextView.visibility = View.VISIBLE
         }
@@ -488,21 +473,13 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         thread.start()
 
 
-
     }
 
-    //
-    private fun uploadImageIntoDrive(position: Int, folderId: String) {
-        val thread1 = Thread {
-            runOnUiThread {
-                uploading_animation_cover.visibility = View.VISIBLE
-                uploading_animation.visibility = View.VISIBLE
-            }
-        }
-        thread1.start()
-        thread1.join()
+    //uploading an image ti the drive
+     fun uploadImageIntoDrive(position: Int) {
+        progressDialog!!.show()
 
-        val TAG = "image upload"
+        val tag = "imageUploading"
         val bitmap = MediaStore.Images.Media.getBitmap(
             this.contentResolver,
             ImageHolder.imageArrayList()[position].uri
@@ -510,14 +487,11 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
         try {
             if (bitmap == null) {
-                Log.i(TAG, "Bitmap is null")
+                Log.i(tag, "Bitmap is null")
                 return
             }
             val file = File(
-                applicationContext.filesDir, UUID.randomUUID().toString().substring(
-                    0,
-                    5
-                )
+                applicationContext.filesDir, UUID.randomUUID().toString().substring(0, 5)
             )
             val bos = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos)
@@ -530,31 +504,26 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             fos.close()
             val compressedImageFile = Compressor(this).compressToFile(file);
             val inputStream = FileInputStream(compressedImageFile)
-            val encryptedFile = EncryptAndDecrypt().encryptFile(inputStream)
+            val encryptedFile = EncryptAndDecrypt().encryptFile(inputStream, "123456789")
             mDriveServiceHelper?.uploadFile(
                 compressedImageFile,
                 "application/octet-stream",
-                folderId
+                null
             )
                 ?.addOnSuccessListener(OnSuccessListener<Any> { googleDriveFileHolder ->
                     removeItem(position)
-                    uploading_animation_cover.visibility = View.GONE
-                    uploading_animation.visibility = View.GONE
-                    Log.i(
-                        TAG,
-                        "Successfully Uploaded. File Id :$googleDriveFileHolder"
-                    )
+                    Log.i(tag, "Successfully Uploaded. File Id :$googleDriveFileHolder")
+                    progressDialog!!.dismiss()
                 })
                 ?.addOnFailureListener { e ->
-                    uploading_animation_cover.visibility = View.GONE
-                    uploading_animation.visibility = View.GONE
                     Log.i(
-                        TAG,
+                        tag,
                         "Failed to Upload. File Id :" + e.message
                     )
+                    progressDialog!!.dismiss()
                 }
         } catch (e: Exception) {
-            Log.i(TAG, "Exception : " + e.message)
+            Log.i(tag, "Exception : " + e.message)
         }
     }
 
@@ -625,28 +594,28 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 //        return true
 //    }
 
-    fun prepareSelection(view: View?, position: Int?) {
-        if ((view as CheckBox).isChecked) {
-            selection_list.add(ImageHolder.imageArrayList()[position!!])
-            Toast.makeText(applicationContext, position.toString(), Toast.LENGTH_SHORT).show()
-            counter += 1
-            updateCounter(counter)
-        } else {
-            selection_list.remove(ImageHolder.imageArrayList()[position!!])
-            Toast.makeText(applicationContext, position.toString(), Toast.LENGTH_SHORT).show()
-            counter -= 1
-            updateCounter(counter)
-        }
+//    fun prepareSelection(view: View?, position: Int?) {
+//        if ((view as CheckBox).isChecked) {
+//            selection_list.add(ImageHolder.imageArrayList()[position!!])
+//            Toast.makeText(applicationContext, position.toString(), Toast.LENGTH_SHORT).show()
+//            counter += 1
+//            updateCounter(counter)
+//        } else {
+//            selection_list.remove(ImageHolder.imageArrayList()[position!!])
+//            Toast.makeText(applicationContext, position.toString(), Toast.LENGTH_SHORT).show()
+//            counter -= 1
+//            updateCounter(counter)
+//        }
+//
+//    }
 
-    }
-
-    private fun updateCounter(counter: Int) {
-        if (counter == 0) {
-            counter_text.text = "0 items are selected"
-        } else {
-            counter_text.text = "$counter items selected"
-        }
-    }
+//    private fun updateCounter(counter: Int) {
+//        if (counter == 0) {
+//            counter_text.text = "0 items are selected"
+//        } else {
+//            counter_text.text = "$counter items selected"
+//        }
+//    }
 
 //    override fun onOptionsItemSelected(item: MenuItem): Boolean {
 //        if (item.itemId == R.id.item_delete) {
@@ -683,16 +652,16 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         }
     }
 
-    private fun deleteImage(path: String) {
-        val delete = File(path)
-        if (delete.exists()) {
-            if (delete.delete()) {
-                println("file Deleted :$path")
-            } else {
-                println("file not Deleted :$path")
-            }
-        }
-    }
+//    private fun deleteImage(path: String) {
+//        val delete = File(path)
+//        if (delete.exists()) {
+//            if (delete.delete()) {
+//                println("file Deleted :$path")
+//            } else {
+//                println("file not Deleted :$path")
+//            }
+//        }
+//    }
 
     private fun getCurrentDate(): String {
         val c = Calendar.getInstance().time
@@ -700,13 +669,13 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         return df.format(c)
     }
 
-     fun readText(imageBitmap: Bitmap) {
-         val singleWordArrayList = java.util.ArrayList<String>()
-         val doubleWordArrayList = java.util.ArrayList<String>()
-         val tripleWordArrayList = java.util.ArrayList<String>()
+    private fun readText(imageBitmap: Bitmap) {
+        val singleWordArrayList = java.util.ArrayList<String>()
+        val doubleWordArrayList = java.util.ArrayList<String>()
+        val tripleWordArrayList = java.util.ArrayList<String>()
 
 
-         val LOG_TAG = "detectedText"
+        val LOG_TAG = "detectedText"
         // imageBitmap is the Bitmap image you're trying to process for text
         if (imageBitmap != null) {
             val textRecognizer: TextRecognizer = TextRecognizer.Builder(applicationContext).build()
@@ -739,7 +708,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
                             singleWordArrayList.add(word)
                         }
 
-                        for (j in 0 until singleWordArrayList.size-2){
+                        for (j in 0 until singleWordArrayList.size - 2) {
                             doubleWordArrayList.add(singleWordArrayList[j] + " " + singleWordArrayList[j + 1])
                             tripleWordArrayList.add(singleWordArrayList[j] + " " + singleWordArrayList[j + 1] + " " + singleWordArrayList[j + 2])
                         }
@@ -750,61 +719,61 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
             }
 
         }
-         val match = findMatchingWords(
-             singleWordArrayList,
-             doubleWordArrayList,
-             tripleWordArrayList
-         )
-//         Log.i("matchingword",match)
+        val match = findMatchingWords(
+            singleWordArrayList,
+            doubleWordArrayList,
+            tripleWordArrayList
+        )
+//         Log.i("matchingWord",match)
     }
 
     private fun findMatchingWords(
         singleList: java.util.ArrayList<String>,
         doubleList: java.util.ArrayList<String>,
         tripleList: java.util.ArrayList<String>
-    ):String?{
-        for (word in tripleList){
-            if (testData.threeWord.containsKey(word)){
-//                Log.i("tagname",word)
+    ): String? {
+        for (word in tripleList) {
+            if (testData.threeWord.containsKey(word)) {
+//                Log.i("tagName",word)
                 return word
             }
         }
-        for (word in doubleList){
-            if (testData.twoWords.containsKey(word)){
+        for (word in doubleList) {
+            if (testData.twoWords.containsKey(word)) {
                 return word
             }
         }
-        for (word in singleList){
-            if (testData.oneWord.containsKey(word)){
+        for (word in singleList) {
+            if (testData.oneWord.containsKey(word)) {
                 return word
             }
         }
 
-        for (word in tripleList){
-          for (key in testData.threeWord.keys){
-              if(key.length <= word.length+2 && key.length  >= word.length-2){
-                  val hLength = upgradedHammingDist(word, word.length, key, key.length)
-                  if (hLength <= 2){
-                      return key
-                  }
-              }
-          }
-        }
-        for (word in doubleList){
-            for (key in testData.twoWords.keys){
-                if(key.length <= word.length+2 && key.length  >= word.length-2){
+        for (word in tripleList) {
+            for (key in testData.threeWord.keys) {
+                if (key.length <= word.length + 2 && key.length >= word.length - 2) {
                     val hLength = upgradedHammingDist(word, word.length, key, key.length)
-                    if (hLength <= 2){
+                    if (hLength <= 2) {
                         return key
                     }
                 }
             }
         }
-        for (word in singleList){
-            for (key in testData.oneWord.keys){
-                if(key.length <= word.length+2 && key.length  >= word.length-2){
+        for (word in doubleList) {
+            for (key in testData.twoWords.keys) {
+                if (key.length <= word.length + 2 && key.length >= word.length - 2) {
                     val hLength = upgradedHammingDist(word, word.length, key, key.length)
-                    if (hLength <= 2){
+                    if (hLength <= 2) {
+                        return key
+                    }
+                }
+            }
+        }
+        for (word in singleList) {
+            for (key in testData.oneWord.keys) {
+                if (key.length <= word.length + 2 && key.length >= word.length - 2) {
+                    val hLength = upgradedHammingDist(word, word.length, key, key.length)
+                    if (hLength <= 2) {
                         return key
                     }
                 }
@@ -813,7 +782,6 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
         return null
     }
-
 
 
 //    fun checklist(){
@@ -827,7 +795,6 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 //        singleWordArrayList.add("good")
 //        singleWordArrayList.add("how")
 //        singleWordArrayList.add("are")
-//        singleWordArrayList.add("heyoullo")
 //        singleWordArrayList.add("hello")
 //
 //        for (i in 0 until singleWordArrayList.size-2){
@@ -837,66 +804,66 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 //        doubleWordArrayList.add(singleWordArrayList[singleWordArrayList.size-2]+ " " + singleWordArrayList[singleWordArrayList.size-1])
 //
 //        for (word in tripleWordArrayList){
-//            Log.i("listwords",word)
+//            Log.i("listWords",word)
 //        }
 //    }
 
 
-    fun toGrayscale(bmpOriginal: Bitmap): Bitmap? {
-        val height: Int = bmpOriginal.height
-        val width: Int = bmpOriginal.width
-        val bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val c = Canvas(bmpGrayscale)
-        val paint = Paint()
-        val cm = ColorMatrix()
-        cm.setSaturation(0F)
-        val f = ColorMatrixColorFilter(cm)
-        paint.colorFilter = f
-        c.drawBitmap(bmpOriginal, 0F, 0F, paint)
-        return bmpGrayscale
-    }
+//    fun toGrayscale(bmpOriginal: Bitmap): Bitmap? {
+//        val height: Int = bmpOriginal.height
+//        val width: Int = bmpOriginal.width
+//        val bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+//        val c = Canvas(bmpGrayscale)
+//        val paint = Paint()
+//        val cm = ColorMatrix()
+//        cm.setSaturation(0F)
+//        val f = ColorMatrixColorFilter(cm)
+//        paint.colorFilter = f
+//        c.drawBitmap(bmpOriginal, 0F, 0F, paint)
+//        return bmpGrayscale
+//    }
 
 
-    fun tapped(position: Int) {
-        val intent = Intent(applicationContext, FullScreenImageActivity::class.java)
-        intent.putExtra("position", position)
-        startActivity(intent)
+//    fun tapped(position: Int) {
+//        val intent = Intent(applicationContext, FullScreenImageActivity::class.java)
+//        intent.putExtra("position", position)
+//        startActivity(intent)
+//
+//    }
 
-    }
+//    fun detectRotation(bitmap: Bitmap, uri: Uri) {
+//
+//        val photoPath = getPath(uri)
+//        val ei = ExifInterface(photoPath)
+//        val orientation: Int = ei.getAttributeInt(
+//            ExifInterface.TAG_ORIENTATION,
+//            ExifInterface.ORIENTATION_UNDEFINED
+//        )
+//
+//        var rotatedBitmap: Bitmap? = null
+//        when (orientation) {
+//            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90)
+//            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180)
+//            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270)
+//            ExifInterface.ORIENTATION_NORMAL -> bitmap
+//        }
+//    }
 
-    fun detectRotation(bitmap: Bitmap, uri: Uri) {
-
-        val photoPath = getPath(uri)
-        val ei = ExifInterface(photoPath)
-        val orientation: Int = ei.getAttributeInt(
-            ExifInterface.TAG_ORIENTATION,
-            ExifInterface.ORIENTATION_UNDEFINED
-        )
-
-        var rotatedBitmap: Bitmap? = null
-        when (orientation) {
-            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(bitmap, 90)
-            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(bitmap, 180)
-            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(bitmap, 270)
-            ExifInterface.ORIENTATION_NORMAL -> bitmap
-        }
-    }
-
-    private fun rotateImage(source: Bitmap, angle: Int): Bitmap? {
-        val matrix = Matrix()
-        matrix.postRotate(angle.toFloat())
-        return Bitmap.createBitmap(
-            source, 0, 0, source.width, source.height,
-            matrix, true
-        )
-    }
+//    private fun rotateImage(source: Bitmap, angle: Int): Bitmap? {
+//        val matrix = Matrix()
+//        matrix.postRotate(angle.toFloat())
+//        return Bitmap.createBitmap(
+//            source, 0, 0, source.width, source.height,
+//            matrix, true
+//        )
+//    }
 
     override fun onMenuItemClick(item: MenuItem?): Boolean {
-        Log.i("drawerfunctions", "asdfghj")
+        Log.i("drawerFunctions", "clicked")
         when (item!!.itemId) {
             R.id.logout1 -> {
-                Toast.makeText(this, "Logout Successfully hahaha", Toast.LENGTH_SHORT).show()
-                Log.i("drawerfunctions", "I am clicked")
+                Toast.makeText(this, "Logout Successfully here", Toast.LENGTH_SHORT).show()
+                Log.i("drawerFunctions", "I am clicked")
                 return true
             }
 
@@ -911,8 +878,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        when (id) {
+        when (item.itemId) {
             (R.id.logout1) -> {
                 val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestEmail()
@@ -954,7 +920,7 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
 
     }
 
-    fun upgradedHammingDist(str1: String, str1_length: Int, str2: String, str2_length: Int): Int {
+    private fun upgradedHammingDist(str1: String, str1_length: Int, str2: String, str2_length: Int): Int {
         var i = 0
         var j = 0
         var count = 0
@@ -988,7 +954,6 @@ class CameraImageRecycleViewActivity : BaseActivity(), MenuItem.OnMenuItemClickL
         }
         return count + abs((str1_length - str2_length) / 2)
     }
-    
 
 
 }

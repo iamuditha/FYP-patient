@@ -25,6 +25,7 @@
             android:id="@+id/imageDisplayWhenEmpty"
             android:layout_width="300dp"
             android:layout_height="300dp"
+            android:src="@drawable/recycle_view_empty"
             app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -121,32 +122,33 @@
 
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/uploading_animation_cover"
+<!--        <ImageView-->
+<!--            android:id="@+id/uploading_animation_cover"-->
 
-            android:visibility="gone"
-            android:layout_width="match_parent"
-            android:layout_height="270dp"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"
-            android:background="@android:color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+<!--            android:visibility="visible"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="270dp"-->
+<!--            android:layout_marginStart="20dp"-->
+<!--            android:layout_marginEnd="20dp"-->
+<!--            android:background="@android:color/white"-->
+<!--            android:src="@drawable/recycle_view_empty"-->
+<!--            app:layout_constraintBottom_toBottomOf="@+id/linearLayout"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent" />-->
 
-        <com.airbnb.lottie.LottieAnimationView
-            android:id="@+id/uploading_animation"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@+id/linearLayout"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:lottie_autoPlay="true"
-            app:lottie_loop="true"
-            app:lottie_rawRes="@raw/uploading" />
+<!--        <com.airbnb.lottie.LottieAnimationView-->
+<!--            android:id="@+id/uploading_animation"-->
+<!--            android:visibility="gone"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            app:layout_constraintBottom_toBottomOf="@+id/linearLayout"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent"-->
+<!--            app:lottie_autoPlay="true"-->
+<!--            app:lottie_loop="true"-->
+<!--            app:lottie_rawRes="@raw/uploading" />-->
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

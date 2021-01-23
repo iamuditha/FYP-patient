@@ -243,7 +243,7 @@ class OcrCaptureActivity : AppCompatActivity() {
 
         }
         val match = findMatchingWords(singleWordArrayList,doubleWordArrayList,tripleWordArrayList)
-        Log.i("matchingword",match)
+//        Log.i("matchingword",match)
         return singleWordArrayList
     }
 

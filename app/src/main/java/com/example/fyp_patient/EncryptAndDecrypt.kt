@@ -16,12 +16,12 @@ import javax.crypto.spec.SecretKeySpec
 
 class EncryptAndDecrypt {
 
-    fun encryptFile(inputStream: InputStream): File {
+    fun encryptFile(inputStream: InputStream,myKey:String): File {
         val randomFileName = UUID.randomUUID().toString().substring(0, 5)
         val fileOutputStream = FileOutputStream(
             Environment.getExternalStorageDirectory().toString() + "/${randomFileName}.crypt/"
         )
-        var key: ByteArray = ("123456789").toByteArray(charset("UTF-8"))
+        var key: ByteArray = (myKey).toByteArray(charset("UTF-8"))
         val messageDigest = MessageDigest.getInstance("SHA-1")
         key = messageDigest.digest(key)
         key = key.copyOf(16)
@@ -37,10 +37,9 @@ class EncryptAndDecrypt {
         cipherOutputStream.flush()
         cipherOutputStream.close()
         inputStream.close()
-        val encryptedFile = File(
+        return File(
             Environment.getExternalStorageDirectory().toString() + "/${randomFileName}.crypt/"
         )
-        return encryptedFile
     }
 
     @Throws(
